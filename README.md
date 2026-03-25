@@ -30,9 +30,9 @@ While most trackers give you a boring list, Orion Arc renders launches on an **i
 
 Most space apps treat launches as rows in a database. Orion Arc treats them as **events on a planet**.
 
-The central idea is simple: if you want to understand the scale and geography of humanity's reach into space, a list tells you nothing. A globe tells you everything. Seeing that most launches happen from a handful of coastal sites, that trajectory arcs fan out in predictable orbital directions, that some launch sites have fired hundreds of missions while others have fired one — that's the kind of insight that only emerges when data is given a physical form.
+The central idea is simple: if you want to understand the scale and geography of humanity's reach into space, a list tells you nothing. A globe tells you everything. Seeing that most launches happen from a handful of coastal sites, that trajectory arcs fan out in predictable orbital directions, that some launch sites have fired hundreds of missions while others have fired one that's the kind of insight that only emerges when data is given a physical form.
 
-The vision for Orion Arc is to be the dashboard that makes space feel **visceral and present**, not archived and academic. Every design decision flows from that — dark UI because space is dark, live countdowns because launches are events not records, trajectory arcs because rockets don't go straight up they arc across the sky.
+The vision for Orion Arc is to be the dashboard that makes space feel **visceral and present**, not archived and academic. Every design decision flows from that dark UI because space is dark, live countdowns because launches are events not records, trajectory arcs because rockets don't go straight up they arc across the sky.
 
 Longer term, Orion Arc is the kind of tool that could sit in a real ops room. The aesthetic isn't decoration — it's the product.
 
