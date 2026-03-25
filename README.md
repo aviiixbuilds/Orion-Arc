@@ -84,12 +84,18 @@ Longer term, Orion Arc is the kind of tool that could sit in a real ops room. Th
 
 ---
 
-## 📡 API
+## 📡 APIs
 
 ### SpaceX API
 ```
 Base URL : https://api.spacexdata.com/v4/
 Auth     : None — no API key required
+```
+
+### Launch Library 2 API
+```
+Base URL: https://ll.thespacedevs.com/2.2.0/
+Auth: None — free tier, 15 requests/hour
 ```
 
 | Endpoint | Used for |
