@@ -105,6 +105,10 @@ Auth: None — free tier, 15 requests/hour
 | `GET /launchpads` | Launch site coordinates → globe pin placement |
 | `GET /crew` | Astronaut data for crewed missions |
 | `GET /payloads` | Payload mass and target orbit type |
+| `GET /launch/upcoming/` | Upcoming launches from all agencies |
+| `GET /launch/previous/` | Past launches from all agencies |
+| `GET /agencies/` | All space agency metadata |
+
 
 ---
 
