@@ -1,8 +1,6 @@
 
-// --- src: js/utils.js ---
 // utils.js — helper functions used across the whole app
 
-// ── DATE & TIME ──
 
 // formats ISO date string into readable format
 // e.g. "2024-03-15T10:30:00Z" -> "15 MAR 2024"
@@ -61,7 +59,6 @@ function getISTString() {
 }
 
 // calculates T-minus breakdown from a future ISO date
-// returns { days, hours, minutes, seconds } or null if date is in the past
 function getTMinus(isoString) {
   const diff = new Date(isoString).getTime() - Date.now();
   if (diff <= 0) return null;
@@ -80,7 +77,6 @@ function getTMinus(isoString) {
   };
 }
 
-// ── GEO / 3D MATH ──
 
 // converts lat/lng to x,y,z position on a sphere
 // used by globe.js to place launch site pins
@@ -96,7 +92,6 @@ function latLngToXYZ(lat, lng, radius) {
   return { x, y, z };
 }
 
-// ── DATA HELPERS ──
 
 // groups an array of launches by year
 // returns an object like { 2020: [...], 2021: [...], ... }
@@ -139,9 +134,7 @@ function getLaunchStatus(launch) {
   return "unknown";
 }
 
-// ── DOM HELPERS ──
 
-// shorthand so i dont type document.getElementById everywhere
 function $(id) {
   return document.getElementById(id);
 }
@@ -159,11 +152,8 @@ function hide(el) {
   if (el) el.classList.add("hidden");
 }
 
-// debounce — delays function call until user stops triggering it
 // used on the search input
-// ── FEATURE: DEBOUNCING ──
 // Limits how frequently a function is executed. 
-// Prevents the app from freezing while typing in the search bar.
 function debounce(fn, delay = 300) {
   let timer;
   return function (...args) {
@@ -174,7 +164,6 @@ function debounce(fn, delay = 300) {
 
 
 
-// --- src: js/api.js ---
 // api.js — all fetch calls live here, nothing else
 
 const BASE_URL = "https://api.spacexdata.com/v4";
@@ -241,14 +230,11 @@ async function fetchAllData() {
   return { launches, rockets, launchpads, payloads };
 }
 
-// shapes raw launch data into something cleaner to work with
-// merges rocket name, launchpad coords, payload info into each launch object
 function shapeLaunchData(launches, rockets, launchpads, payloads) {
   return launches.map(launch => {
     const rocket = rockets.find(r => r.id === launch.rocket) || {};
     const pad = launchpads.find(p => p.id === launch.launchpad) || {};
 
-    // a launch can have multiple payloads, just grab first one for now
     const payloadId = launch.payloads?.[0];
     const payload = payloads.find(p => p.id === payloadId) || {};
 
@@ -289,12 +275,10 @@ function shapeLaunchData(launches, rockets, launchpads, payloads) {
 
 
 
-// --- src: js/render.js ---
 // render.js — takes data, puts it on the screen
 
 
 
-// ── STATS BAR ──
 
 function renderStats(launches) {
   const total    = launches.length;
@@ -312,7 +296,6 @@ function renderStats(launches) {
   $("stat-rockets").textContent  = rockets;
 }
 
-// ── HERO SECTION ──
 
 function renderHero(launch) {
   if (!launch) return;
@@ -323,7 +306,6 @@ function renderHero(launch) {
   $("hero-site").textContent         = launch.siteName;
 }
 
-// ── LAUNCH CARDS ──
 
 function createLaunchCard(launch) {
   const status = getLaunchStatus(launch);
@@ -405,14 +387,11 @@ function renderLaunchCards(launches) {
 }
 
 // clears skeletons and replaces with real cards
-// ── FEATURE: LOADING INDICATORS (Skeleton Loaders) ──
-// Provides visual feedback to the user while data is being fetched.
 function clearSkeletons() {
   const skeletons = document.querySelectorAll(".skeleton-card");
   skeletons.forEach(s => s.remove());
 }
 
-// ── PAGINATION ──
 
 function renderPagination(currentPage, totalPages) {
   const container = $("page-numbers");
@@ -442,7 +421,6 @@ function renderPagination(currentPage, totalPages) {
   $("page-next").disabled = currentPage === totalPages;
 }
 
-// ── MISSION MODAL ──
 
 function renderModal(launch) {
   const status = getLaunchStatus(launch);
@@ -510,7 +488,6 @@ function closeModal() {
   hide($("modal-overlay"));
 }
 
-// ── AGENCY CARDS ──
 
 function renderAgencies(launches) {
   const grid = $("agencies-grid");
@@ -547,7 +524,6 @@ function renderAgencies(launches) {
   });
 }
 
-// ── TIMELINE CHART ──
 // drawing a simple bar chart with SVG — no libraries
 
 function renderTimeline(launches) {
@@ -614,7 +590,6 @@ function renderTimeline(launches) {
   container.appendChild(svg);
 }
 
-// ── FAVORITES ──
 
 function getSavedIds() {
   return JSON.parse(localStorage.getItem("orion-favorites") || "[]");
@@ -633,8 +608,6 @@ function removeFavorite(id) {
   localStorage.setItem("orion-favorites", JSON.stringify(saved));
 }
 
-// ── FEATURE: LOCAL STORAGE (Saved Missions) ──
-// Allows persistence of data (favorites) within the browser.
 function toggleFavorite(id) {
   const saved = getSavedIds();
   if (saved.includes(id)) {
@@ -676,7 +649,6 @@ function updateFavButtons(id, isSaved) {
   });
 }
 
-// ── STATUS DOT ──
 
 function setStatusLive() {
   const dot   = $("status-dot");
@@ -696,16 +668,12 @@ function setStatusError() {
 
 
 
-// --- src: js/filters.js ---
 // filters.js — search, filter, sort — all using HOFs
 // this is where .map .filter .sort .find .reduce all live
 
 
 
-// ── FILTER LOGIC ──
 
-// each function takes the full launches array and returns a filtered version
-// they're kept separate so they can be chained cleanly in applyFilters()
 
 function filterBySearch(launches, query) {
   if (!query || query.trim() === "") return launches;
@@ -737,7 +705,6 @@ function filterByOrbit(launches, orbit) {
   return launches.filter(l => l.orbit === orbit);
 }
 
-// ── SORT LOGIC ──
 
 function sortLaunches(launches, sortVal) {
   // spread to avoid mutating the original array
@@ -759,7 +726,6 @@ function sortLaunches(launches, sortVal) {
   }
 }
 
-// ── ACTIVE FILTERS DISPLAY ──
 
 function renderActivePills(filters) {
   const container = $("active-filters");
@@ -786,7 +752,6 @@ function renderActivePills(filters) {
   });
 }
 
-// ── APPLY ALL FILTERS ──
 // chains all filter + sort functions together
 // this runs every time any filter/sort/search changes
 
@@ -797,7 +762,6 @@ function applyFilters(state, renderPage) {
   const orbit  = $("filter-orbit")?.value   || "all";
   const sort   = $("sort-select")?.value    || "date-desc";
 
-  // chain all filters — each one takes the output of the previous
   let result = state.allLaunches;
   result = filterBySearch(result, query);
   result = filterByAgency(result, agency);
@@ -814,10 +778,8 @@ function applyFilters(state, renderPage) {
   renderPage(1);
 }
 
-// ── INIT — called from main.js ──
 
 function initFilters(state, renderPage) {
-  // debounced search so it doesn't fire on every single keystroke
   const debouncedSearch = debounce(() => applyFilters(state, renderPage), 300);
 
   $("search-input")?.addEventListener("input", debouncedSearch);
@@ -851,8 +813,6 @@ function initFilters(state, renderPage) {
 
 
 
-// --- src: js/countdown.js ---
-// countdown.js — live T-minus timer for next upcoming launch
 
 
 
@@ -887,7 +847,6 @@ function initCountdown(launchDateISO) {
     const prevSec = cdSeconds.textContent;
     if (prevSec !== t.seconds) {
       cdSeconds.classList.remove("tick");
-      // small timeout so removing and re-adding the class triggers the animation
       setTimeout(() => cdSeconds.classList.add("tick"), 10);
     }
 
@@ -904,16 +863,12 @@ function initCountdown(launchDateISO) {
 
 
 
-// --- src: three/globe.js ---
 // globe.js — three.js earth globe
-// handles: sphere, atmosphere, launch pins, trajectory arcs, click detection
 
 
 
-// three.js is loaded via CDN in index.html so it's on window.THREE
 const THREE = window.THREE;
 
-// ── GLOBE STATE ──
 let scene, camera, renderer, earth, atmosphere;
 let orbitControls = null;
 let raycaster, mouse;
@@ -924,7 +879,6 @@ let onPinClick = null; // callback set from outside
 
 const GLOBE_RADIUS = 5;
 
-// ── INIT ──
 
 function initGlobe(container, onClickCallback) {
   if (!THREE) {
@@ -967,7 +921,6 @@ function initGlobe(container, onClickCallback) {
   raycaster = new THREE.Raycaster();
   mouse     = new THREE.Vector2();
 
-  // drag to rotate — manual implementation (no OrbitControls in r128 without import)
   initDragRotate(container);
 
   // click handler
@@ -984,12 +937,10 @@ function initGlobe(container, onClickCallback) {
   if (loader) loader.style.display = "none";
 }
 
-// ── EARTH SPHERE ──
 
 function buildEarth() {
   const geo = new THREE.SphereGeometry(GLOBE_RADIUS, 64, 64);
 
-  // load earth texture — using a public domain nasa blue marble texture
   const loader  = new THREE.TextureLoader();
   const texture = loader.load(
     "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
@@ -1010,7 +961,6 @@ function buildEarth() {
   scene.add(earth);
 }
 
-// ── ATMOSPHERE ──
 
 function buildAtmosphere() {
   const geo = new THREE.SphereGeometry(GLOBE_RADIUS * 1.04, 64, 64);
@@ -1024,7 +974,6 @@ function buildAtmosphere() {
   scene.add(atmosphere);
 }
 
-// ── STARS ──
 
 function buildStars() {
   const geo = new THREE.BufferGeometry();
@@ -1048,7 +997,6 @@ function buildStars() {
   scene.add(stars);
 }
 
-// ── LAUNCH PINS ──
 
 function addPin(lat, lng, data) {
   const pos = latLngToXYZ(lat, lng, GLOBE_RADIUS + 0.05);
@@ -1079,8 +1027,6 @@ function addPins(launchpadData) {
   launchpads = launchpadData;
 }
 
-// ── TRAJECTORY ARC ──
-// draws a curved line from launch site toward "orbit" (a point above the surface)
 
 function addArc(lat, lng, color = 0x4fc3f7) {
   // clear previous arcs
@@ -1088,7 +1034,6 @@ function addArc(lat, lng, color = 0x4fc3f7) {
 
   const startPos = latLngToXYZ(lat, lng, GLOBE_RADIUS + 0.05);
 
-  // orbit endpoint — same lat, slightly different lng, higher altitude
   const endPos = latLngToXYZ(lat + 15, lng + 20, GLOBE_RADIUS * 1.8);
 
   // control point for the bezier curve — above the midpoint
@@ -1137,7 +1082,6 @@ function clearArcs() {
   arcs = [];
 }
 
-// ── DRAG ROTATION ──
 // simple mouse/touch drag to rotate globe
 
 function initDragRotate(container) {
@@ -1196,7 +1140,6 @@ function initDragRotate(container) {
   container.addEventListener("touchend", () => { isDragging = false; });
 }
 
-// ── CLICK DETECTION ──
 
 function onCanvasClick(e) {
   if (!raycaster || !pins.length) return;
@@ -1223,7 +1166,6 @@ function onCanvasClick(e) {
   }
 }
 
-// ── RESIZE ──
 
 function onResize(container) {
   if (!camera || !renderer) return;
@@ -1232,7 +1174,6 @@ function onResize(container) {
   renderer.setSize(container.clientWidth, container.clientHeight);
 }
 
-// ── RENDER LOOP ──
 
 function animate() {
   requestAnimationFrame(animate);
@@ -1246,7 +1187,6 @@ function animate() {
 
 
 
-// --- src: js/main.js ---
 // main.js — wires everything together
 
 
@@ -1256,7 +1196,6 @@ function animate() {
 
 
 
-// ── APP STATE ──
 // everything lives here so all functions can access it
 const state = {
   allLaunches:     [],   // full shaped dataset
@@ -1266,7 +1205,6 @@ const state = {
   selectedLaunch:  null,
 };
 
-// ── INIT ──
 
 async function init() {
   try {
@@ -1316,7 +1254,6 @@ async function init() {
   }
 }
 
-// ── NEW HERO LOGIC ──
 
 function initInteractiveText() {
   const container = document.getElementById('reveal-text');
@@ -1339,7 +1276,6 @@ function initInteractiveText() {
   ];
 
   let html = '';
-  // Convert string to letters, ignoring spaces in delay counting but handling them visually
   let letterIndex = 0;
   for (let i = 0; i < text.length; i++) {
     if (text[i] === ' ') {
@@ -1425,10 +1361,7 @@ function initScrollHero() {
   });
 }
 
-// ── PAGINATION ──
 
-// ── FEATURE: PAGINATION ──
-// Divides large sets of API data into smaller, manageable pages.
 function renderPage(page) {
   state.currentPage = page;
 
@@ -1442,14 +1375,12 @@ function renderPage(page) {
   // stagger card entrance
   staggerCards();
 
-  // scroll back to launches section if paginating (not on first load)
   if (page > 1 || state.currentPage > 1) {
     const section = document.getElementById("launches");
     if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
 
-// adds .visible class to cards with a small delay between each
 function staggerCards() {
   const cards = document.querySelectorAll(".launch-card:not(.skeleton-card)");
   cards.forEach((card, i) => {
@@ -1465,7 +1396,6 @@ function staggerAgencyCards() {
   });
 }
 
-// ── AGENCY FILTER DROPDOWN ──
 
 function populateAgencyFilter(launches) {
   const select   = $("filter-agency");
@@ -1479,7 +1409,6 @@ function populateAgencyFilter(launches) {
   });
 }
 
-// ── MODAL ──
 
 function openMission(id) {
   const launch = state.allLaunches.find(l => l.id === id);
@@ -1488,7 +1417,6 @@ function openMission(id) {
   renderModal(launch);
 }
 
-// ── ERROR STATE ──
 
 function showErrorState() {
   const grid = $("launches-grid");
@@ -1502,7 +1430,6 @@ function showErrorState() {
   `;
 }
 
-// ── UTC CLOCK ──
 
 function startClock() {
   const clock = $("nav-clock");
@@ -1513,10 +1440,7 @@ function startClock() {
   }, 1000);
 }
 
-// ── THEME TOGGLE ──
 
-// ── FEATURE: LOCAL STORAGE (User Preferences) ──
-// Specifically used to persist the Dark/Light mode theme choice.
 function initTheme() {
   const saved = localStorage.getItem("orion-theme") || "dark";
   document.body.setAttribute("data-theme", saved);
@@ -1533,7 +1457,6 @@ function initTheme() {
   });
 }
 
-// ── HAMBURGER MENU ──
 
 function initHamburger() {
   const btn    = $("nav-hamburger");
@@ -1550,11 +1473,8 @@ function initHamburger() {
   });
 }
 
-// ── NAV SCROLL SPY ──
 // highlights the correct nav link based on scroll position
 
-// ── FEATURE: THROTTLING (via INTERSECTION OBSERVER) ──
-// Ensures animations and scroll-events run at a controlled, performant rate.
 function initScrollSpy() {
   const sections = ["globe", "launches", "agencies", "favorites"];
 
@@ -1574,7 +1494,6 @@ function initScrollSpy() {
   });
 }
 
-// ── INTERSECTION OBSERVER ──
 // triggers .visible on elements as they scroll into view
 
 function initIntersectionObserver() {
@@ -1591,7 +1510,6 @@ function initIntersectionObserver() {
   document.querySelectorAll(".agency-card").forEach(el => observer.observe(el));
 }
 
-// ── EVENT LISTENERS ──
 
 function initEventListeners() {
 
@@ -1692,15 +1610,12 @@ function initEventListeners() {
   });
 }
 
-// ── ORBITAL ARC VISUALISER ──
-// Pure Canvas 2D — no libraries. Draws Earth, orbit rings, animated trajectory arcs.
 
 function initOrbitalVisualiser(launches) {
   const canvas  = document.getElementById('orbital-canvas');
   if (!canvas) return;
   const ctx     = canvas.getContext('2d');
 
-  // ── CONFIG ──
   const ORBIT_BANDS = {
     LEO:   { label: 'LEO',   r: 0.34, color: '#4fc3f7' },
     ISS:   { label: 'ISS',   r: 0.38, color: '#81c784' },
@@ -1720,7 +1635,6 @@ function initOrbitalVisualiser(launches) {
   let arc         = null;       // active arc animation state
   let particles   = [];         // orbiting particles
 
-  // ── RESIZE ──
   function resize() {
     const wrap = canvas.parentElement;
     const size = Math.min(wrap.clientWidth, wrap.clientHeight);
@@ -1730,14 +1644,12 @@ function initOrbitalVisualiser(launches) {
   resize();
   window.addEventListener('resize', () => { resize(); draw(); });
 
-  // ── COORDINATE HELPERS ──
   function cx() { return canvas.width  / 2; }
   function cy() { return canvas.height / 2; }
   function R()  { return canvas.width  * 0.22; } // Earth radius
 
   // map lat/lng to canvas x,y on Earth circle edge
   function latLngToCanvas(lat, lng) {
-    // project longitude onto the circle (top-down equatorial view)
     const angle = (lng - 90) * (Math.PI / 180); // 0° points up
     const r = R();
     return {
@@ -1746,26 +1658,22 @@ function initOrbitalVisualiser(launches) {
     };
   }
 
-  // ── ORBIT BAND ──
   function getOrbitBand(orbit) {
     if (!orbit || orbit === '—') return DEFAULT_BAND;
     const k = Object.keys(ORBIT_BANDS).find(k => orbit.toUpperCase().includes(k));
     return k ? ORBIT_BANDS[k] : DEFAULT_BAND;
   }
 
-  // ── ARC STATE MACHINE ──
   function startArc(launch) {
     const band = getOrbitBand(launch.orbit);
     const orbitR = canvas.width * band.r;
     const site   = latLngToCanvas(launch.siteLat, launch.siteLng);
 
-    // angle along the orbit ring where the arc ends (random but linked to launch)
     const hash    = launch.flightNumber % 360;
     const endAngle = (hash / 360) * Math.PI * 2;
     const endX     = cx() + orbitR * Math.cos(endAngle);
     const endY     = cy() + orbitR * Math.sin(endAngle);
 
-    // quadratic bezier control point — push outward for the arc belly
     const midX = (site.x + endX) / 2;
     const midY = (site.y + endY) / 2;
     const pushX = (midX - cx()) * 0.6;
@@ -1800,7 +1708,6 @@ function initOrbitalVisualiser(launches) {
     return { x, y };
   }
 
-  // ── PARTICLES ── tiny dots that slowly orbit a ring
   function spawnParticle(startAngle, radius, color) {
     particles.push({
       angle:  startAngle,
@@ -1815,7 +1722,6 @@ function initOrbitalVisualiser(launches) {
     if (particles.length > 18) particles.shift();
   }
 
-  // ── UPDATE PANEL ──
   function updatePanel(launch, idx) {
     const $n = document.getElementById('orbital-mission-name');
     const $r = document.getElementById('orbital-rocket');
@@ -1836,14 +1742,12 @@ function initOrbitalVisualiser(launches) {
     if ($total) $total.textContent = usable.length;
   }
 
-  // ── SHOW MISSION ──
   function showMission(idx) {
     const launch = usable[idx];
     updatePanel(launch, idx);
     startArc(launch);
   }
 
-  // ── AUTO-CYCLE ──
   function scheduleNext() {
     clearTimeout(autoTimer);
     if (!autoplay) return;
@@ -1854,7 +1758,6 @@ function initOrbitalVisualiser(launches) {
     }, 4500);
   }
 
-  // ── DRAW ──
   function drawEarth() {
     const r   = R();
     const isDark = document.body.getAttribute('data-theme') === 'dark';
@@ -1931,7 +1834,6 @@ function initOrbitalVisualiser(launches) {
   }
 
   function drawLaunchSites() {
-    // plot all unique launch sites as faint dots on Earth's equator projection
     const seenSites = new Set();
     usable.forEach((l, i) => {
       const key = `${l.siteLat},${l.siteLng}`;
@@ -2052,7 +1954,6 @@ function initOrbitalVisualiser(launches) {
     requestAnimationFrame(draw);
   }
 
-  // ── BUTTONS ──
   document.getElementById('orbital-prev')?.addEventListener('click', () => {
     currentIdx = (currentIdx - 1 + usable.length) % usable.length;
     showMission(currentIdx);
@@ -2072,23 +1973,19 @@ function initOrbitalVisualiser(launches) {
     else clearTimeout(autoTimer);
   });
 
-  // ── KICK OFF ──
   showMission(0);
   scheduleNext();
   draw();
 }
 
-// ── START ──
 
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Force load at top of page and prevent browser from jumping
   if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
   }
   window.scrollTo(0, 0);
   
-  // Strip any #launches hash from the URL on load to prevent snapping
   if (window.location.hash) {
     history.replaceState('', document.title, window.location.pathname + window.location.search);
   }

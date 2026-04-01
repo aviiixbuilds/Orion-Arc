@@ -11,13 +11,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
 
-  <!--------------------------------- CSS --------------------------------->
-    <link rel="stylesheet" href="style.css" />
+      <link rel="stylesheet" href="style.css" />
 </head>
 <body data-theme="dark">
 
-  <!------------------------------------NAVBAR----------------------------->
-  <nav class="navbar" id="navbar">
+    <nav class="navbar" id="navbar">
     <div class="nav-left">
       <div class="nav-logo">
         <img src="assets/logo.png" alt="Orion Arc Logo" style="height: 24px; width: auto; filter: brightness(1.2) drop-shadow(0 0 6px rgba(79, 195, 247, 0.4));" />
@@ -49,16 +47,14 @@
     </div>
   </nav>
 
-  <!------------------------- Mobile nav drawer -------------------------->
-  <div class="nav-drawer" id="nav-drawer">
+    <div class="nav-drawer" id="nav-drawer">
     <a href="#launches" class="drawer-link">LAUNCHES</a>
     <a href="#orbital" class="drawer-link">ORBITAL</a>
     <a href="#agencies" class="drawer-link">AGENCIES</a>
     <a href="#favorites" class="drawer-link">FAVORITES</a>
   </div>
 
-  <!--------------------HERO  — SCROLL VIDEO & INTERACTIVE TEXT--------------------->
-  <section class="hero-scroll" id="hero-scroll">
+    <section class="hero-scroll" id="hero-scroll">
     <div class="hero-sticky-container">
       <video id="hero-video" class="hero-bg-video" src="assets/hero-bg.mp4" muted playsinline preload="auto"></video>
       <div class="hero-overlay"></div>
@@ -72,8 +68,7 @@
     </div>
   </section>
 
-  <!--------------------------------STATS BAR------------------------------->
-  <section class="stats-bar" id="stats-bar">
+    <section class="stats-bar" id="stats-bar">
     <div class="stat-item">
       <span class="stat-value" id="stat-total">—</span>
       <span class="stat-label">TOTAL LAUNCHES</span>
@@ -100,13 +95,11 @@
     </div>
   </section>
 
-  <!-----------------------------------MAIN CONTENT---------------------------->
-  <main class="main-wrapper">
+    <main class="main-wrapper">
 
 
 
-    <!---------------------- LAUNCHES SECTION ──----------------------->
-    <section class="launches-section" id="launches">
+        <section class="launches-section" id="launches">
       <div class="section-header">
         <h2 class="section-title">
           <span class="title-accent">02</span> ALL LAUNCHES
@@ -162,13 +155,10 @@
 
       </div>
 
-      <!--------------------Active filters display------------------------>
-      <div class="active-filters" id="active-filters"></div>
+            <div class="active-filters" id="active-filters"></div>
 
-      <!---------------------Launch cards--------------------->
-      <div class="launches-grid" id="launches-grid">
-        <!------------------Skeleton loaders —--------------------->
-        <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
+            <div class="launches-grid" id="launches-grid">
+                <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
         <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
         <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
         <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
@@ -176,16 +166,14 @@
         <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
       </div>
 
-      <!------------------ Empty state -------------->
-      <div class="empty-state hidden" id="empty-state">
+            <div class="empty-state hidden" id="empty-state">
         <span class="empty-icon">⊘</span>
         <p class="empty-title">No missions found</p>
         <p class="empty-sub">Try adjusting your search or filters</p>
         <button class="btn-ghost" id="empty-reset">RESET FILTERS</button>
       </div>
 
-      <!----------------Pagination -------------->
-      <div class="pagination" id="pagination">
+            <div class="pagination" id="pagination">
         <button class="page-btn" id="page-prev" disabled>← PREV</button>
         <div class="page-numbers" id="page-numbers"></div>
         <button class="page-btn" id="page-next">NEXT →</button>
@@ -193,8 +181,7 @@
 
     </section>
 
-    <!-----------------------------ORBITAL ARC VISUALISER---------------------------------->
-    <section class="orbital-section" id="orbital">
+        <section class="orbital-section" id="orbital">
       <div class="section-header">
         <h2 class="section-title">
           <span class="title-accent">03</span> ORBITAL MAP
@@ -264,8 +251,7 @@
       </div>
     </section>
 
-    <!-----------------------------TIMELINE---------------------------------->
-    <section class="timeline-section" id="timeline">
+        <section class="timeline-section" id="timeline">
       <div class="section-header">
         <h2 class="section-title">
           <span class="title-accent">04</span> LAUNCH TIMELINE
@@ -276,8 +262,7 @@
       </div>
     </section>
 
-    <!----------------------------AGENCIES------------------------------------>
-    <section class="agencies-section" id="agencies">
+        <section class="agencies-section" id="agencies">
       <div class="section-header">
         <h2 class="section-title">
           <span class="title-accent">05</span> AGENCIES
@@ -289,8 +274,7 @@
       </div>
     </section>
 
-    <!-------------------------------FAVORITES SECTION-------------------------->
-    <section class="favorites-section" id="favorites">
+        <section class="favorites-section" id="favorites">
       <div class="section-header">
         <h2 class="section-title">
           <span class="title-accent">06</span> FAVORITES
@@ -309,8 +293,7 @@
 
   </main>
 
-  <!---------------------MISSION DETAIL MODAL----------------------->
-  <div class="modal-overlay hidden" id="modal-overlay">
+    <div class="modal-overlay hidden" id="modal-overlay">
     <div class="modal" id="mission-modal" role="dialog" aria-modal="true">
 
       <div class="modal-header">
@@ -360,8 +343,7 @@
     </div>
   </div>
 
-  <!----------------------FOOTER-------------------------->
-  <footer class="footer">
+    <footer class="footer">
     <div class="footer-left">
       <span class="footer-logo" style="display: flex; align-items: center;"><img src="assets/logo.png" alt="Orion Arc Logo" style="height: 18px; width: auto; margin-right: 8px; filter: brightness(1.2);" /> ORION ARC</span>
       <span class="footer-tagline">Track real-world rocket launches on an interactive 3D globe</span>
@@ -372,8 +354,7 @@
     </div>
   </footer>
 
-  <!----------------------SCRIPTS------------------------->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="main.js"></script>
 </body>
 </html>
