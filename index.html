@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orion Arc — Track real-world rocket launches on an interactive 3D globe</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!--------------------------------- CSS --------------------------------->
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body data-theme="light">
+
+  <!------------------------------------NAVBAR----------------------------->
+  <nav class="navbar" id="navbar">
+    <div class="nav-left">
+      <div class="nav-logo">
+        <img src="assets/logo.png" alt="Orion Arc Logo" style="height: 24px; width: auto; filter: brightness(1.2) drop-shadow(0 0 6px rgba(79, 195, 247, 0.4));" />
+        <span class="logo-text">ORION ARC</span>
+      </div>
+      <div class="nav-status">
+        <span class="status-dot" id="status-dot"></span>
+        <span class="status-label" id="status-label">CONNECTING...</span>
+      </div>
+    </div>
+
+    <div class="nav-center">
+      <nav class="nav-links">
+        <a href="#launches" class="nav-link active" data-section="launches">LAUNCHES</a>
+        <a href="#orbital" class="nav-link" data-section="orbital">ORBITAL</a>
+        <a href="#agencies" class="nav-link" data-section="agencies">AGENCIES</a>
+        <a href="#favorites" class="nav-link" data-section="favorites">FAVORITES</a>
+      </nav>
+    </div>
+
+    <div class="nav-right">
+      <div class="nav-clock" id="nav-clock">--:--:-- UTC</div>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+        <span class="theme-icon">◐</span>
+      </button>
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!------------------------- Mobile nav drawer -------------------------->
+  <div class="nav-drawer" id="nav-drawer">
+    <a href="#launches" class="drawer-link">LAUNCHES</a>
+    <a href="#orbital" class="drawer-link">ORBITAL</a>
+    <a href="#agencies" class="drawer-link">AGENCIES</a>
+    <a href="#favorites" class="drawer-link">FAVORITES</a>
+  </div>
+
+  <!--------------------HERO  — SCROLL VIDEO & INTERACTIVE TEXT--------------------->
+  <section class="hero-scroll" id="hero-scroll">
+    <div class="hero-sticky-container">
+      <video id="hero-video" class="hero-bg-video" src="assets/hero-bg.mp4" muted playsinline preload="auto"></video>
+      <div class="hero-overlay"></div>
+      
+      <div class="reveal-text-container">
+        <h1 class="reveal-text" id="reveal-text" aria-label="ORION ARC">
+          <!-- Spans populated by JS -->
+        </h1>
+        <p class="hero-scroll-hint">Most space apps treat launches as rows in a database.<br>Orion Arc treats them as events on a planet.</p>
+      </div>
+    </div>
+  </section>
+
+  <!--------------------------------STATS BAR------------------------------->
+  <section class="stats-bar" id="stats-bar">
+    <div class="stat-item">
+      <span class="stat-value" id="stat-total">—</span>
+      <span class="stat-label">TOTAL LAUNCHES</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-value" id="stat-success">—</span>
+      <span class="stat-label">SUCCESS RATE</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-value" id="stat-upcoming">—</span>
+      <span class="stat-label">UPCOMING</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-value" id="stat-agencies">—</span>
+      <span class="stat-label">AGENCIES</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-value" id="stat-rockets">—</span>
+      <span class="stat-label">ROCKET TYPES</span>
+    </div>
+  </section>
+
+  <!-----------------------------------MAIN CONTENT---------------------------->
+  <main class="main-wrapper">
+
+
+
+    <!---------------------- LAUNCHES SECTION ──----------------------->
+    <section class="launches-section" id="launches">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="title-accent">02</span> ALL LAUNCHES
+        </h2>
+        <span class="launch-count" id="launch-count">— missions</span>
+      </div>
+
+      <div class="controls-bar" id="controls-bar">
+
+        <div class="search-wrapper">
+          <span class="search-icon">⌕</span>
+          <input
+            type="text"
+            class="search-input"
+            id="search-input"
+            placeholder="Search mission, rocket, agency..."
+            autocomplete="off"
+          />
+          <button class="search-clear" id="search-clear" aria-label="Clear search">✕</button>
+        </div>
+
+        <div class="filter-group">
+          <select class="filter-select" id="filter-agency">
+            <option value="all">ALL AGENCIES</option>
+          </select>
+
+          <select class="filter-select" id="filter-status">
+            <option value="all">ALL STATUS</option>
+            <option value="success">SUCCESS</option>
+            <option value="failed">FAILED</option>
+            <option value="upcoming">UPCOMING</option>
+          </select>
+
+          <select class="filter-select" id="filter-orbit">
+            <option value="all">ALL ORBITS</option>
+            <option value="LEO">LEO</option>
+            <option value="GEO">GEO</option>
+            <option value="ISS">ISS</option>
+            <option value="Polar">POLAR</option>
+            <option value="SSO">SSO</option>
+          </select>
+        </div>
+
+        <div class="sort-group">
+          <select class="filter-select" id="sort-select">
+            <option value="date-desc">DATE ↓ NEWEST</option>
+            <option value="date-asc">DATE ↑ OLDEST</option>
+            <option value="mass-desc">PAYLOAD MASS ↓</option>
+            <option value="mass-asc">PAYLOAD MASS ↑</option>
+            <option value="name-asc">NAME A → Z</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!--------------------Active filters display------------------------>
+      <div class="active-filters" id="active-filters"></div>
+
+      <!---------------------Launch cards--------------------->
+      <div class="launches-grid" id="launches-grid">
+        <!------------------Skeleton loaders —--------------------->
+        <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
+        <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
+        <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
+        <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
+        <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
+        <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
+      </div>
+
+      <!------------------ Empty state -------------->
+      <div class="empty-state hidden" id="empty-state">
+        <span class="empty-icon">⊘</span>
+        <p class="empty-title">No missions found</p>
+        <p class="empty-sub">Try adjusting your search or filters</p>
+        <button class="btn-ghost" id="empty-reset">RESET FILTERS</button>
+      </div>
+
+      <!----------------Pagination -------------->
+      <div class="pagination" id="pagination">
+        <button class="page-btn" id="page-prev" disabled>← PREV</button>
+        <div class="page-numbers" id="page-numbers"></div>
+        <button class="page-btn" id="page-next">NEXT →</button>
+      </div>
+
+    </section>
+
+    <!-----------------------------ORBITAL ARC VISUALISER---------------------------------->
+    <section class="orbital-section" id="orbital">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="title-accent">03</span> ORBITAL MAP
+        </h2>
+        <p class="section-subtitle">Live trajectory arcs · real mission data</p>
+      </div>
+
+      <div class="orbital-layout">
+
+        <!-- Left Panel: Info + Legend -->
+        <div class="orbital-panel">
+          <div class="orbital-mission-card" id="orbital-mission-card">
+            <div class="orbital-mission-label">ACTIVE MISSION</div>
+            <div class="orbital-mission-name" id="orbital-mission-name">Loading...</div>
+            <div class="orbital-mission-meta">
+              <div class="orbital-meta-row">
+                <span class="orbital-meta-key">ROCKET</span>
+                <span class="orbital-meta-val" id="orbital-rocket">—</span>
+              </div>
+              <div class="orbital-meta-row">
+                <span class="orbital-meta-key">SITE</span>
+                <span class="orbital-meta-val" id="orbital-site">—</span>
+              </div>
+              <div class="orbital-meta-row">
+                <span class="orbital-meta-key">ORBIT</span>
+                <span class="orbital-meta-val" id="orbital-orbit">—</span>
+              </div>
+              <div class="orbital-meta-row">
+                <span class="orbital-meta-key">DATE</span>
+                <span class="orbital-meta-val" id="orbital-date">—</span>
+              </div>
+              <div class="orbital-meta-row">
+                <span class="orbital-meta-key">STATUS</span>
+                <span class="orbital-meta-val" id="orbital-status">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="orbital-legend">
+            <div class="orbital-legend-title">ORBIT BANDS</div>
+            <div class="orbital-legend-item"><span class="orbital-legend-dot" style="background:#4fc3f7"></span>LEO · Low Earth Orbit</div>
+            <div class="orbital-legend-item"><span class="orbital-legend-dot" style="background:#81c784"></span>ISS · Space Station</div>
+            <div class="orbital-legend-item"><span class="orbital-legend-dot" style="background:#ffb74d"></span>SSO · Sun-Sync Orbit</div>
+            <div class="orbital-legend-item"><span class="orbital-legend-dot" style="background:#ce93d8"></span>GEO · Geostationary</div>
+            <div class="orbital-legend-item"><span class="orbital-legend-dot" style="background:#ef9a9a"></span>POLAR / OTHER</div>
+          </div>
+
+          <div class="orbital-controls">
+            <div class="orbital-counter">
+              <span class="orbital-counter-label">MISSION</span>
+              <span class="orbital-counter-val"><span id="orbital-idx">1</span> / <span id="orbital-total">—</span></span>
+            </div>
+            <div class="orbital-btn-row">
+              <button class="orbital-nav-btn" id="orbital-prev">← PREV</button>
+              <button class="orbital-nav-btn" id="orbital-next">NEXT →</button>
+            </div>
+            <button class="orbital-auto-btn" id="orbital-auto">⏸ PAUSE</button>
+          </div>
+        </div>
+
+        <!-- Canvas -->
+        <div class="orbital-canvas-wrap">
+          <canvas id="orbital-canvas"></canvas>
+          <div class="orbital-canvas-label">EARTH / EQUATORIAL VIEW · NOT TO SCALE</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-----------------------------TIMELINE---------------------------------->
+    <section class="timeline-section" id="timeline">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="title-accent">04</span> LAUNCH TIMELINE
+        </h2>
+        <p class="section-subtitle">Launches per year across all agencies</p>
+      </div>
+      <div class="timeline-chart" id="timeline-chart">
+      </div>
+    </section>
+
+    <!----------------------------AGENCIES------------------------------------>
+    <section class="agencies-section" id="agencies">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="title-accent">05</span> AGENCIES
+        </h2>
+        <p class="section-subtitle">Breakdown by space agency</p>
+      </div>
+      <div class="agencies-grid" id="agencies-grid">
+        <!-- Rendered dynamically by render.js -->
+      </div>
+    </section>
+
+    <!-------------------------------FAVORITES SECTION-------------------------->
+    <section class="favorites-section" id="favorites">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="title-accent">06</span> FAVORITES
+        </h2>
+        <span class="fav-count" id="fav-count">0 saved</span>
+      </div>
+      <div class="favorites-grid" id="favorites-grid">
+        <!-- Rendered dynamically from localStorage -->
+      </div>
+      <div class="empty-state hidden" id="fav-empty-state">
+        <span class="empty-icon">♡</span>
+        <p class="empty-title">No saved missions yet</p>
+        <p class="empty-sub">Hit the bookmark icon on any launch card</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!---------------------MISSION DETAIL MODAL----------------------->
+  <div class="modal-overlay hidden" id="modal-overlay">
+    <div class="modal" id="mission-modal" role="dialog" aria-modal="true">
+
+      <div class="modal-header">
+        <div class="modal-badge" id="modal-badge">—</div>
+        <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <h2 class="modal-mission-name" id="modal-mission-name">—</h2>
+
+        <div class="modal-meta-grid">
+          <div class="modal-meta-item">
+            <span class="meta-label">ROCKET</span>
+            <span class="meta-value" id="modal-rocket">—</span>
+          </div>
+          <div class="modal-meta-item">
+            <span class="meta-label">DATE</span>
+            <span class="meta-value" id="modal-date">—</span>
+          </div>
+          <div class="modal-meta-item">
+            <span class="meta-label">LAUNCH SITE</span>
+            <span class="meta-value" id="modal-site">—</span>
+          </div>
+          <div class="modal-meta-item">
+            <span class="meta-label">ORBIT</span>
+            <span class="meta-value" id="modal-orbit">—</span>
+          </div>
+          <div class="modal-meta-item">
+            <span class="meta-label">PAYLOAD MASS</span>
+            <span class="meta-value" id="modal-mass">—</span>
+          </div>
+          <div class="modal-meta-item">
+            <span class="meta-label">FLIGHT NUMBER</span>
+            <span class="meta-value" id="modal-flight">—</span>
+          </div>
+        </div>
+
+        <div class="modal-details" id="modal-details">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-ghost" id="modal-fav-btn">♡ SAVE MISSION</button>
+        <a class="btn-primary" id="modal-wiki-link" href="#" target="_blank" rel="noopener">VIEW WIKIPEDIA →</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!----------------------FOOTER-------------------------->
+  <footer class="footer">
+    <div class="footer-left">
+      <span class="footer-logo" style="display: flex; align-items: center;"><img src="assets/logo.png" alt="Orion Arc Logo" style="height: 18px; width: auto; margin-right: 8px; filter: brightness(1.2);" /> ORION ARC</span>
+      <span class="footer-tagline">Track real-world rocket launches on an interactive 3D globe</span>
+    </div>
+    <div class="footer-right">
+      <span class="footer-api">Data · SpaceX API</span>
+      <a class="footer-link" href="https://github.com/aviiixbuilds/orion-arc" target="_blank" rel="noopener">GitHub →</a>
+    </div>
+  </footer>
+
+  <!----------------------SCRIPTS------------------------->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
