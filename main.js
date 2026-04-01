@@ -1344,9 +1344,12 @@ function initScrollHero() {
 
       // Transform Text (zoom + fade)
       if (textContainer) {
-        const scale   = 1 + (progress * 0.45); // scales from 1.0 to 1.45
-        const opacity = 1 - (progress * 1.5);   // fades out fully by 66% scroll
-        const blur    = progress * 12;          // adds motion blur effect
+        // Keep text sharp until 25% scrolled, then begin fade and blur
+        const delayedProgress = Math.max(0, progress - 0.25);
+        
+        const scale   = 1 + (progress * 0.45); // smooth zoom starts immediately
+        const opacity = 1 - (delayedProgress * 1.5);   
+        const blur    = delayedProgress * 18;          
         
         textContainer.style.transform = `scale(${scale})`;
         textContainer.style.opacity   = Math.max(0, opacity);
