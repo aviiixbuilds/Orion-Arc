@@ -418,10 +418,23 @@ h1, h2, h3, h4 {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  /* Fixed vertical baseline: don't let hint affect center */
+  will-change: transform, opacity, filter;
+  transform-style: preserve-3d;
 }
 
 .hero-scroll-hint {
-  margin-top: 50px;
+  position: absolute;
+  bottom: clamp(2rem, 6vh, 4rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  
+  width: 100%;
+  max-width: 600px;
+  
+  will-change: transform, opacity;
   font-family: var(--font-mono);
   font-size: 0.9rem;
   line-height: 1.6;
@@ -1549,63 +1562,90 @@ h1, h2, h3, h4 {
 .launch-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: 16px; /* Increased border radius for modern feel */
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: border-color var(--transition), transform var(--transition);
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .launch-card:hover {
-  border-color: var(--border-bright);
-  transform: translateY(-2px);
+  border-color: var(--text-accent);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(79, 195, 247, 0.2);
 }
 
 .card-top {
   position: relative;
   background: var(--bg-secondary);
-  height: 120px;
+  height: 140px; /* slightly taller */
   display: flex;
   align-items: center;
   justify-content: center;
   border-bottom: 1px solid var(--border);
   overflow: hidden;
+  transition: background 0.4s ease;
 }
 
-/* subtle grid pattern on card top like the hero */
+/* Modern radial glow instead of grid */
 .card-top::before {
   content: '';
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 20px 20px;
-  opacity: 0.4;
+  background: radial-gradient(circle at center, rgba(79, 195, 247, 0.08) 0%, transparent 60%);
+  opacity: 0.8;
+  transition: opacity 0.4s ease;
+}
+
+.launch-card:hover .card-top::before {
+  opacity: 1;
+  background: radial-gradient(circle at center, rgba(79, 195, 247, 0.15) 0%, transparent 70%);
 }
 
 .card-patch {
   position: relative;
   z-index: 1;
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
+  perspective: 1000px;
+  /* Add continuous float animation */
+  animation: floatSatellite 4s ease-in-out infinite alternate;
+}
+
+@keyframes floatSatellite {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(1deg); }
+  100% { transform: translateY(0) rotate(-1deg); }
 }
 
 .card-patch img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 0 12px rgba(79, 195, 247, 0.2));
+  filter: drop-shadow(0 0 10px rgba(79, 195, 247, 0.3));
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), filter 0.5s ease;
+  transform-style: preserve-3d;
+}
+
+.launch-card:hover .card-patch img {
+  transform: scale(1.15) rotateZ(3deg) translateZ(20px);
+  filter: drop-shadow(0 15px 25px rgba(79, 195, 247, 0.7));
 }
 
 .card-patch .placeholder-patch {
   opacity: 0.95;
-  filter: brightness(1.25) drop-shadow(0 0 8px rgba(79, 195, 247, 0.4));
-  transition: filter 0.3s ease;
+  filter: brightness(1.25) drop-shadow(0 0 15px rgba(79, 195, 247, 0.5));
+  transition: filter 0.4s ease, transform 0.4s ease;
+}
+
+.launch-card:hover .card-patch .placeholder-patch {
+  filter: brightness(1.5) drop-shadow(0 0 30px rgba(79, 195, 247, 0.9));
 }
 
 .card-patch-placeholder {
@@ -1684,8 +1724,16 @@ h1, h2, h3, h4 {
 }
 
 .meta-icon {
-  font-size: 0.7rem;
-  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meta-icon-img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  display: block;
 }
 
 .card-details {

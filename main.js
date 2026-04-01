@@ -355,13 +355,13 @@ function createLaunchCard(launch) {
 
       <div class="card-meta">
         <span class="card-meta-item">
-          <span class="meta-icon">⚡</span> ${launch.rocketName}
+          <span class="meta-icon"><img src="assets/Spaceship.png" class="meta-icon-img" alt="Rocket" /></span> ${launch.rocketName}
         </span>
         <span class="card-meta-item">
-          <span class="meta-icon">📍</span> ${launch.siteName}
+          <span class="meta-icon"><img src="assets/location.png" class="meta-icon-img" alt="Location" /></span> ${launch.siteName}
         </span>
         <span class="card-meta-item">
-          <span class="meta-icon">🗓</span> ${formatDate(launch.date)}
+          <span class="meta-icon"><img src="assets/callender.png" class="meta-icon-img" alt="Date" /></span> ${formatDate(launch.date)}
         </span>
         ${launch.orbit !== "—" ? `
         <span class="card-meta-item">
@@ -1386,13 +1386,15 @@ function initScrollHero() {
   // Make sure video stays paused so we can control timeline
   video.pause();
 
+  const textContainer = document.querySelector('.reveal-text-container');
+  const heroHint     = document.querySelector('.hero-scroll-hint');
+
   window.addEventListener('scroll', () => {
     if (isNaN(video.duration) || video.duration === 0) return;
     
     const rect = section.getBoundingClientRect();
     const scrollY = window.scrollY || window.pageYOffset;
     const startOffset = section.offsetTop;
-    // max scroll height of the hero section constraint
     const maxScroll = section.offsetHeight - window.innerHeight;
     
     if (maxScroll <= 0) return;
@@ -1401,7 +1403,24 @@ function initScrollHero() {
     progress = Math.max(0, Math.min(1, progress));
     
     requestAnimationFrame(() => {
+      // Sync video
       video.currentTime = progress * video.duration;
+
+      // Transform Text (zoom + fade)
+      if (textContainer) {
+        const scale   = 1 + (progress * 0.45); // scales from 1.0 to 1.45
+        const opacity = 1 - (progress * 1.5);   // fades out fully by 66% scroll
+        const blur    = progress * 12;          // adds motion blur effect
+        
+        textContainer.style.transform = `scale(${scale})`;
+        textContainer.style.opacity   = Math.max(0, opacity);
+        textContainer.style.filter    = `blur(${blur}px)`;
+      }
+
+      // Parallax for hint
+      if (heroHint) {
+        heroHint.style.transform = `translate(-50%, ${progress * -80}px)`;
+      }
     });
   });
 }
@@ -2063,6 +2082,17 @@ function initOrbitalVisualiser(launches) {
 
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Force load at top of page and prevent browser from jumping
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+  window.scrollTo(0, 0);
+  
+  // Strip any #launches hash from the URL on load to prevent snapping
+  if (window.location.hash) {
+    history.replaceState('', document.title, window.location.pathname + window.location.search);
+  }
+
   initTheme();
   initHamburger();
   startClock();
