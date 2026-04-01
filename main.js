@@ -161,6 +161,9 @@ function hide(el) {
 
 // debounce — delays function call until user stops triggering it
 // used on the search input
+// ── FEATURE: DEBOUNCING ──
+// Limits how frequently a function is executed. 
+// Prevents the app from freezing while typing in the search bar.
 function debounce(fn, delay = 300) {
   let timer;
   return function (...args) {
@@ -402,6 +405,8 @@ function renderLaunchCards(launches) {
 }
 
 // clears skeletons and replaces with real cards
+// ── FEATURE: LOADING INDICATORS (Skeleton Loaders) ──
+// Provides visual feedback to the user while data is being fetched.
 function clearSkeletons() {
   const skeletons = document.querySelectorAll(".skeleton-card");
   skeletons.forEach(s => s.remove());
@@ -628,6 +633,8 @@ function removeFavorite(id) {
   localStorage.setItem("orion-favorites", JSON.stringify(saved));
 }
 
+// ── FEATURE: LOCAL STORAGE (Saved Missions) ──
+// Allows persistence of data (favorites) within the browser.
 function toggleFavorite(id) {
   const saved = getSavedIds();
   if (saved.includes(id)) {
@@ -1401,6 +1408,8 @@ function initScrollHero() {
 
 // ── PAGINATION ──
 
+// ── FEATURE: PAGINATION ──
+// Divides large sets of API data into smaller, manageable pages.
 function renderPage(page) {
   state.currentPage = page;
 
@@ -1487,6 +1496,8 @@ function startClock() {
 
 // ── THEME TOGGLE ──
 
+// ── FEATURE: LOCAL STORAGE (User Preferences) ──
+// Specifically used to persist the Dark/Light mode theme choice.
 function initTheme() {
   const saved = localStorage.getItem("orion-theme") || "dark";
   document.body.setAttribute("data-theme", saved);
@@ -1523,6 +1534,8 @@ function initHamburger() {
 // ── NAV SCROLL SPY ──
 // highlights the correct nav link based on scroll position
 
+// ── FEATURE: THROTTLING (via INTERSECTION OBSERVER) ──
+// Ensures animations and scroll-events run at a controlled, performant rate.
 function initScrollSpy() {
   const sections = ["globe", "launches", "agencies", "favorites"];
 
