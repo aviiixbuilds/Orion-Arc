@@ -1484,7 +1484,7 @@ function startClock() {
 // ── THEME TOGGLE ──
 
 function initTheme() {
-  const saved = localStorage.getItem("orion-theme") || "light";
+  const saved = localStorage.getItem("orion-theme") || "dark";
   document.body.setAttribute("data-theme", saved);
 
   $("theme-toggle").addEventListener("click", () => {
