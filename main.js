@@ -48,12 +48,16 @@ function getYear(isoString) {
 }
 
 // get current UTC time as HH:MM:SS string
-function getUTCTimeString() {
-  const now = new Date();
-  const h = String(now.getUTCHours()).padStart(2, "0");
-  const m = String(now.getUTCMinutes()).padStart(2, "0");
-  const s = String(now.getUTCSeconds()).padStart(2, "0");
-  return `${h}:${m}:${s} UTC`;
+function getISTString() {
+  const options = {
+    timeZone: 'Asia/Kolkata',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  };
+  const time = new Intl.DateTimeFormat('en-IN', options).format(new Date());
+  return `${time} IST`;
 }
 
 // calculates T-minus breakdown from a future ISO date
@@ -1475,9 +1479,9 @@ function showErrorState() {
 function startClock() {
   const clock = $("nav-clock");
   if (!clock) return;
-  clock.textContent = getUTCTimeString();
+  clock.textContent = getISTString();
   setInterval(() => {
-    clock.textContent = getUTCTimeString();
+    clock.textContent = getISTString();
   }, 1000);
 }
 
