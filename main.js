@@ -1493,30 +1493,36 @@ function initIntersectionObserver() {
   document.querySelectorAll(".section-title").forEach(el => observer.observe(el));
   document.querySelectorAll(".agency-card").forEach(el => observer.observe(el));
 
-  // Prepare UI text jumping animation
+  // Setup Typewriter experience
   const floatTextEl = document.getElementById("timeline-float-text");
-  if (floatTextEl) {
-    const text = floatTextEl.textContent.trim();
-    floatTextEl.innerHTML = "";
+  const words = ["Launches per year...", "Across all agencies.", "Pioneering the future."];
+  let wordIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+  let typewriterStarted = false;
+
+  function type() {
+    if (!typewriterStarted) return;
     
-    text.split(" ").forEach(word => {
-      const wordSpan = document.createElement("span");
-      wordSpan.className = "timeline-word";
-      word.split("").forEach((char) => {
-        const charSpan = document.createElement("span");
-        charSpan.className = "timeline-char";
-        charSpan.textContent = char;
-        wordSpan.appendChild(charSpan);
-      });
-      floatTextEl.appendChild(wordSpan);
-    });
+    const currentWord = words[wordIndex];
+    const speed = isDeleting ? 40 : 80;
     
-    const chars = floatTextEl.querySelectorAll(".timeline-char");
-    chars.forEach((c, i) => {
-      // Use a transition-property specific delay so the hover states remain instant
-      c.style.transitionProperty = "transform, opacity";
-      c.style.transitionDelay = `${i * 0.04}s`;
-    });
+    if (!isDeleting && charIndex < currentWord.length) {
+      charIndex++;
+      floatTextEl.innerHTML = `${currentWord.substring(0, charIndex)}<span class="typewriter-cursor">|</span>`;
+    } else if (isDeleting && charIndex > 0) {
+      charIndex--;
+      floatTextEl.innerHTML = `${currentWord.substring(0, charIndex)}<span class="typewriter-cursor">|</span>`;
+    } else if (!isDeleting && charIndex === currentWord.length) {
+      // Pause at end of word
+      setTimeout(() => isDeleting = true, 2000);
+    } else {
+      isDeleting = false;
+      wordIndex = (wordIndex + 1) % words.length;
+    }
+    
+    const nextCallDelay = isDeleting ? (charIndex === 0 ? 1000 : 40) : (charIndex === currentWord.length ? 2000 : 80);
+    setTimeout(type, nextCallDelay);
   }
 
   // Timeline chart observer (animate 3D neon bars and synchronized numbers)
@@ -1524,8 +1530,11 @@ function initIntersectionObserver() {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         
-        // Trigger Text Wave
-        if (floatTextEl) floatTextEl.classList.add("visible");
+        // Start Typewriter
+        if (floatTextEl) {
+          typewriterStarted = true;
+          type();
+        }
 
         const wrapEls = document.querySelectorAll(".neon-bar-wrap");
         if (wrapEls.length === 0) return;

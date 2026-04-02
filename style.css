@@ -1354,33 +1354,33 @@ h1, h2, h3, h4 {
   pointer-events: none; /* Allows user to still interact with UI underneath */
 }
 
-.timeline-word {
-  display: inline-block;
-  /* Removed overflow: hidden so the massive text-shadow blur can disperse naturally in all directions */
-  margin-right: 14px;
-  vertical-align: top;
-}
-
-.timeline-char {
-  display: inline-block;
+.timeline-floating-title {
+  position: absolute;
+  top: 45%;
+  left: 8%;
+  transform: translateY(-50%);
+  width: 45%;
+  z-index: 10;
+  pointer-events: none;
   font-family: var(--font-display);
   font-size: 3.5rem;
   font-weight: 800;
   line-height: 1.1;
   color: #fff;
-  /* Clean, static 3D floating look */
   text-shadow: 0 0 30px rgba(0, 230, 118, 0.4), 0 0 15px rgba(79, 195, 247, 0.3);
-  opacity: 0;
-  transform: translateY(40px) rotateZ(10deg); /* Re-calibrated entrance */
-  will-change: transform, opacity;
-  /* Simplified for just the entrance wave */
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
-  pointer-events: none; /* Do not block interactions with the graph bars underneath */
 }
 
-.timeline-floating-title.visible .timeline-char {
-  opacity: 1;
-  transform: translateY(0) rotateZ(0) scale(1);
+.typewriter-cursor {
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--text-accent);
+  text-shadow: 0 0 15px var(--text-accent);
+  animation: cursorBlink 0.8s infinite;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 .timeline-chart {
