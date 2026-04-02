@@ -1368,33 +1368,19 @@ h1, h2, h3, h4 {
   font-weight: 800;
   line-height: 1.1;
   color: #fff;
-  /* Massive organic glow without blocky bounds */
+  /* Clean, static 3D floating look */
   text-shadow: 0 0 30px rgba(0, 230, 118, 0.4), 0 0 15px rgba(79, 195, 247, 0.3);
   opacity: 0;
   transform: translateY(40px) rotateZ(10deg); /* Re-calibrated entrance */
-  will-change: transform, opacity, filter;
-  /* Decoupled transition: Snappy 0.2s for interactive feedback, 0.4s for the physics-based bounce */
-  transition: transform 0.25s cubic-bezier(0.2, 0, 0.2, 1), 
-              opacity 0.5s ease, 
-              color 0.2s ease, 
-              text-shadow 0.2s ease;
-  pointer-events: auto; /* Capture cursor interactions manually */
-  cursor: pointer;
+  will-change: transform, opacity;
+  /* Simplified for just the entrance wave */
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
+  pointer-events: none; /* Do not block interactions with the graph bars underneath */
 }
 
 .timeline-floating-title.visible .timeline-char {
   opacity: 1;
   transform: translateY(0) rotateZ(0) scale(1);
-}
-
-.timeline-floating-title.visible .timeline-char:hover {
-  /* Fast, tactile response */
-  transform: translateY(-6px) scale(1.15);
-  color: var(--text-accent);
-  text-shadow: 0 0 25px rgba(0, 230, 118, 0.9);
-  transition: transform 0.15s cubic-bezier(0.1, 0.7, 0.1, 1), color 0.1s ease;
-  z-index: 5;
-  position: relative;
 }
 
 .timeline-chart {
