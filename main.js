@@ -2062,6 +2062,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   initHamburger();
   startClock();
+  initTimelineShader(); // Initialize the 3D space-grid background for timeline
   initEventListeners();
   init();
 });

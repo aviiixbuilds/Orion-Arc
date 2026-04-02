@@ -1342,6 +1342,24 @@ h1, h2, h3, h4 {
   flex-direction: column;
   justify-content: center;
   padding: 80px 24px 24px;
+  overflow: hidden; /* Contains the shader bounds */
+}
+
+.timeline-bg-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  background: #000;
+}
+
+/* Ensure other content is above shader */
+.timeline-section > div {
+  position: relative;
+  z-index: 10;
 }
 
 .timeline-floating-title {
