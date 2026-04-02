@@ -1342,24 +1342,6 @@ h1, h2, h3, h4 {
   flex-direction: column;
   justify-content: center;
   padding: 80px 24px 24px;
-  overflow: hidden; /* Contains the shader bounds */
-}
-
-.timeline-bg-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-  background: #000;
-}
-
-/* Ensure other content is above shader */
-.timeline-section > div {
-  position: relative;
-  z-index: 10;
 }
 
 .timeline-floating-title {
@@ -1374,12 +1356,12 @@ h1, h2, h3, h4 {
 
 .timeline-floating-title {
   position: absolute;
-  top: 45%;
-  left: 8%;
+  top: 45%; /* Places it vertically towards the middle, below header */
+  left: 8%; /* Locks it to the empty left space in front of the tall right bars */
   transform: translateY(-50%);
-  width: 45%;
+  width: 40%; /* restricts width to force natural paragraph wrapping */
   z-index: 10;
-  pointer-events: none;
+  pointer-events: none; /* Allows user to still interact with UI underneath */
   font-family: var(--font-display);
   font-size: 3.5rem;
   font-weight: 800;
