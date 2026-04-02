@@ -1513,6 +1513,8 @@ function initIntersectionObserver() {
     
     const chars = floatTextEl.querySelectorAll(".timeline-char");
     chars.forEach((c, i) => {
+      // Use a transition-property specific delay so the hover states remain instant
+      c.style.transitionProperty = "transform, opacity";
       c.style.transitionDelay = `${i * 0.04}s`;
     });
   }
