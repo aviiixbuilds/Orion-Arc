@@ -536,58 +536,39 @@ function renderTimeline(launches) {
   if (years.length === 0) return;
 
   const maxCount = Math.max(...years.map(y => byYear[y].length));
-  const barWidth = 32;
-  const gap      = 12;
-  const chartH   = 160;
-  const labelH   = 24;
-  const totalW   = years.length * (barWidth + gap);
 
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", `0 0 ${totalW} ${chartH + labelH}`);
-  svg.setAttribute("width", "100%");
-  svg.style.overflow = "visible";
+  years.forEach((year) => {
+    const count = byYear[year].length;
+    // Map maxCount to strictly 80% to prevent flexbox clipping, guaranteeing true proportional heights
+    const heightPercent = (count / maxCount) * 80; 
 
-  years.forEach((year, i) => {
-    const count  = byYear[year].length;
-    const barH   = Math.max(4, (count / maxCount) * chartH);
-    const x      = i * (barWidth + gap);
-    const y      = chartH - barH;
+    const wrap = document.createElement("div");
+    wrap.className = "neon-bar-wrap";
 
-    // bar
-    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute("x", x);
-    rect.setAttribute("y", y);
-    rect.setAttribute("width", barWidth);
-    rect.setAttribute("height", barH);
-    rect.setAttribute("rx", "2");
-    rect.setAttribute("fill", "var(--text-accent)");
-    rect.setAttribute("opacity", "0.7");
-    svg.appendChild(rect);
+    const valEl = document.createElement("div");
+    valEl.className = "neon-bar-val";
+    valEl.textContent = "0";
 
-    // count label on top of bar
-    const countLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    countLabel.setAttribute("x", x + barWidth / 2);
-    countLabel.setAttribute("y", y - 5);
-    countLabel.setAttribute("text-anchor", "middle");
-    countLabel.setAttribute("font-size", "9");
-    countLabel.setAttribute("fill", "var(--text-muted)");
-    countLabel.setAttribute("font-family", "Share Tech Mono, monospace");
-    countLabel.textContent = count;
-    svg.appendChild(countLabel);
+    const barEl = document.createElement("div");
+    barEl.className = "neon-bar-3d";
+    // Do not set inline height yet. We'll store it in a data attribute
+    barEl.dataset.targetHeightPercent = heightPercent;
+    barEl.dataset.targetCount = count;
+    barEl.innerHTML = `
+      <div class="face front"></div>
+      <div class="face right"></div>
+      <div class="face top"></div>
+    `;
 
-    // year label below bar
-    const yearLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    yearLabel.setAttribute("x", x + barWidth / 2);
-    yearLabel.setAttribute("y", chartH + 16);
-    yearLabel.setAttribute("text-anchor", "middle");
-    yearLabel.setAttribute("font-size", "9");
-    yearLabel.setAttribute("fill", "var(--text-muted)");
-    yearLabel.setAttribute("font-family", "Share Tech Mono, monospace");
-    yearLabel.textContent = year;
-    svg.appendChild(yearLabel);
+    const yearEl = document.createElement("div");
+    yearEl.className = "neon-bar-year";
+    yearEl.textContent = year;
+
+    wrap.appendChild(valEl);
+    wrap.appendChild(barEl);
+    wrap.appendChild(yearEl);
+    container.appendChild(wrap);
   });
-
-  container.appendChild(svg);
 }
 
 
@@ -1511,6 +1492,80 @@ function initIntersectionObserver() {
 
   document.querySelectorAll(".section-title").forEach(el => observer.observe(el));
   document.querySelectorAll(".agency-card").forEach(el => observer.observe(el));
+
+  // Prepare UI text jumping animation
+  const floatTextEl = document.getElementById("timeline-float-text");
+  if (floatTextEl) {
+    const text = floatTextEl.textContent.trim();
+    floatTextEl.innerHTML = "";
+    
+    text.split(" ").forEach(word => {
+      const wordSpan = document.createElement("span");
+      wordSpan.className = "timeline-word";
+      word.split("").forEach((char) => {
+        const charSpan = document.createElement("span");
+        charSpan.className = "timeline-char";
+        charSpan.textContent = char;
+        wordSpan.appendChild(charSpan);
+      });
+      floatTextEl.appendChild(wordSpan);
+    });
+    
+    const chars = floatTextEl.querySelectorAll(".timeline-char");
+    chars.forEach((c, i) => {
+      c.style.transitionDelay = `${i * 0.04}s`;
+    });
+  }
+
+  // Timeline chart observer (animate 3D neon bars and synchronized numbers)
+  const timelineObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        
+        // Trigger Text Wave
+        if (floatTextEl) floatTextEl.classList.add("visible");
+
+        const wrapEls = document.querySelectorAll(".neon-bar-wrap");
+        if (wrapEls.length === 0) return;
+
+        let startTime = null;
+        const duration = 2500; // Exact length of animation for all bars
+
+        function animateChart(timestamp) {
+          if (!startTime) startTime = timestamp;
+          const elapsed = timestamp - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          // Smooth easing out
+          const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+
+          wrapEls.forEach(wrap => {
+            const bar = wrap.querySelector(".neon-bar-3d");
+            const valEl = wrap.querySelector(".neon-bar-val");
+            
+            const targetH = parseFloat(bar.dataset.targetHeightPercent);
+            const targetCount = parseInt(bar.dataset.targetCount, 10);
+            
+            // Set dynamic height
+            bar.style.height = `${targetH * easeOutQuart}%`;
+            
+            // Animate number identically with height
+            valEl.textContent = Math.floor(targetCount * easeOutQuart);
+            valEl.style.opacity = Math.min(progress * 2, 1); // Fast fade in
+          });
+
+          if (progress < 1) {
+            requestAnimationFrame(animateChart);
+          }
+        }
+        
+        requestAnimationFrame(animateChart);
+        timelineObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.4 }); // Trigger when timeline section is 40% visible
+
+  const tlSection = document.getElementById("timeline");
+  if (tlSection) timelineObserver.observe(tlSection);
 }
 
 

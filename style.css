@@ -1334,14 +1334,166 @@ h1, h2, h3, h4 {
   background: var(--upcoming-dim);
 }
 
+/* ── FULL PAGE TIMELINE SECTION ── */
+.timeline-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 24px 24px;
+}
+
+.timeline-floating-title {
+  position: absolute;
+  top: 45%; /* Places it vertically towards the middle, below header */
+  left: 8%; /* Locks it to the empty left space in front of the tall right bars */
+  transform: translateY(-50%);
+  width: 40%; /* restricts width to force natural paragraph wrapping */
+  z-index: 10;
+  pointer-events: none; /* Allows user to still interact with UI underneath */
+}
+
+.timeline-word {
+  display: inline-block;
+  /* Removed overflow: hidden so the massive text-shadow blur can disperse naturally in all directions */
+  margin-right: 14px;
+  vertical-align: top;
+}
+
+.timeline-char {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #fff;
+  /* Massive organic glow without blocky bounds */
+  text-shadow: 0 0 30px rgba(0, 230, 118, 0.4), 0 0 15px rgba(79, 195, 247, 0.3);
+  opacity: 0;
+  transform: translateY(40px) rotateZ(10deg); /* Re-calibrated entrance */
+  will-change: transform, opacity;
+  /* Ultra-smooth interpolation for both the initial entrance and the cursor hovering */
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              opacity 0.5s ease, 
+              color 0.3s ease, 
+              text-shadow 0.3s ease;
+  pointer-events: auto; /* Capture cursor interactions manually */
+  cursor: pointer;
+}
+
+.timeline-floating-title.visible .timeline-char {
+  opacity: 1;
+  transform: translateY(0) rotateZ(0) scale(1);
+}
+
+.timeline-floating-title.visible .timeline-char:hover {
+  /* A subtle, elegant suspended float driven flawlessly by the transition bezier */
+  transform: translateY(-8px) scale(1.1) rotateZ(-2deg);
+  color: var(--text-accent);
+  text-shadow: 0 0 30px #00e676, 0 8px 15px rgba(0,0,0,0.6);
+  z-index: 5;
+  position: relative; /* Brings hovering letter above peers */
+}
+
 .timeline-chart {
   width: 100%;
-  min-height: 200px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 24px;
+  height: 85vh; /* 1.75x taller physical boundary for the graph */
+  background: transparent;
+  border: none;
+  padding: 0;
   overflow-x: auto;
+  overflow-y: visible; /* Allow massive bars to break bounds vertically */
+  display: flex;
+  align-items: stretch; /* Correct height resolution for children */
+  justify-content: center; /* keep centered on screen */
+  gap: clamp(8px, 1.5vw, 24px); /* dynamic fluid gap */
+  padding-bottom: 50px;
+  padding-top: 60px;
+  position: relative;
+  scrollbar-width: none;
+  perspective: 1200px;
+}
+.timeline-chart::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── NEON BARS ── */
+.neon-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  height: 100%;
+  width: 56px; /* 1.25x scaled wrapper */
+}
+
+.neon-bar-val {
+  font-family: var(--font-display);
+  font-size: 1.25rem; /* Shrunk slightly */
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 24px;
+  text-shadow: 0 0 15px rgba(0, 230, 118, 0.9), 0 0 30px rgba(79, 195, 247, 0.6);
+  opacity: 0;
+  transform: translateZ(30px);
+}
+
+.neon-bar-year {
+  font-family: var(--font-mono);
+  font-size: 0.9rem; /* Shrunk slightly */
+  color: var(--text-primary);
+  margin-top: 20px;
+  transform: translateZ(10px);
+}
+
+/* THE 3D PILLAR */
+.neon-bar-3d {
+  position: relative;
+  width: 45px; /* 1.25x scaled width */
+  height: 0;
+  flex-shrink: 0; /* Refuse flex compression, true height wins */
+  transform-style: preserve-3d;
+  transform: rotateX(15deg) rotateY(-20deg);
+}
+
+.face {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.face.front {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #00e676, #00897b);
+  transform: translateZ(15px); /* Matches half of the 30px depth */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0; /* soften edges */
+}
+
+.face.right {
+  width: 30px; /* Depth of 30px */
+  height: 100%;
+  background: linear-gradient(180deg, #00b0ff, #006064);
+  right: 0;
+  left: auto;
+  transform: translateX(15px) rotateY(90deg); /* matches half width of 30px */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0; /* soften edges */
+}
+
+.face.top {
+  width: 100%;
+  height: 30px; /* Depth of 30px */
+  background: #69f0ae; /* Slightly darker cool green for realism without glow */
+  top: 0;
+  bottom: auto;
+  transform: translateY(-15px) rotateX(90deg); /* matches half height of 30px */
+  border-radius: 8px; /* soften geometry to create a pill/bevel effect */
 }
 
 .agencies-grid {
