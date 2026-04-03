@@ -95,6 +95,21 @@
     </div>
   </section>
 
+    <section class="globe-section" id="globe">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="title-accent">01</span> SPACE STATIONS & PADS
+        </h2>
+        <p class="section-subtitle">Real-time coordinates of historic sites</p>
+      </div>
+      <div class="globe-container">
+        <div id="globe-canvas-container"></div>
+        <div class="globe-overlay">
+          <div class="globe-tip">● DRAG TO ROTATE · SCROLL TO ZOOM</div>
+        </div>
+      </div>
+    </section>
+
     <main class="main-wrapper">
 
 
@@ -251,7 +266,8 @@
       </div>
     </section>
 
-        <section class="timeline-section" id="timeline">
+    <section class="timeline-section" id="timeline">
+      <div id="spline-bg-container" class="spline-bg-container"></div>
       <div class="section-header">
         <h2 class="section-title">
           <span class="title-accent">04</span> LAUNCH TIMELINE
@@ -262,6 +278,11 @@
       </div>
       <div class="timeline-chart" id="timeline-chart">
       </div>
+
+      <script type="module">
+        import SplineBackground from './three.js';
+        new SplineBackground('#spline-bg-container', 'https://prod.spline.design/cP1bMY7lsO80l7zU/scene.splinecode');
+      </script>
     </section>
 
         <section class="agencies-section" id="agencies">
@@ -357,7 +378,6 @@
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="timeline-shader.js"></script>
-  <script src="main.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>

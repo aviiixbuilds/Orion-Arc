@@ -1337,11 +1337,38 @@ h1, h2, h3, h4 {
 /* ── FULL PAGE TIMELINE SECTION ── */
 .timeline-section {
   position: relative;
-  min-height: 100vh;
+  min-height: 80vh; /* Reduced height to keep it horizontally focused */
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 80px 24px 24px;
+  padding: 40px 24px 24px; /* More compact top padding */
+  overflow: hidden; /* Ensure background doesn't leak */
+  background: transparent !important;
+}
+
+
+/* ── SPLINE BACKGROUND ── */
+.spline-bg-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; 
+  pointer-events: none;
+  background: transparent !important;
+}
+
+.spline-bg-container canvas {
+  position: absolute;
+  top: 0; 
+  left: 50%;
+  transform: translateX(-50%); 
+  width: 100% !important;
+  height: 200% !important;
+  object-fit: cover;
+  opacity: 1; 
+  filter: brightness(0.7) contrast(1.1);
 }
 
 .timeline-floating-title {
@@ -1356,7 +1383,7 @@ h1, h2, h3, h4 {
 
 .timeline-floating-title {
   position: absolute;
-  top: 45%; /* Places it vertically towards the middle, below header */
+  top: 40%; /* Places it vertically towards the middle, below header */
   left: 8%; /* Locks it to the empty left space in front of the tall right bars */
   transform: translateY(-50%);
   width: 40%; /* restricts width to force natural paragraph wrapping */
@@ -1383,9 +1410,57 @@ h1, h2, h3, h4 {
   50% { opacity: 0; }
 }
 
+/* ── GLOBE SECTION ── */
+.globe-section {
+  padding: 80px 24px;
+  background: var(--bg-root);
+  border-bottom: 1px solid var(--border);
+}
+
+.globe-container {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  background: radial-gradient(circle at center, #1a237e 0%, #0d121d 70%);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+}
+
+#globe-canvas-container {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+#globe-canvas-container:active {
+  cursor: grabbing;
+}
+
+.globe-overlay {
+  position: absolute;
+  bottom: 24px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.globe-tip {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  background: rgba(8, 11, 15, 0.7);
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(4px);
+}
 .timeline-chart {
   width: 100%;
-  height: 85vh; /* 1.75x taller physical boundary for the graph */
+  height: 70vh; /* 1.75x taller physical boundary for the graph */
   background: transparent;
   border: none;
   padding: 0;
@@ -1401,6 +1476,7 @@ h1, h2, h3, h4 {
   scrollbar-width: none;
   perspective: 1200px;
 }
+
 .timeline-chart::-webkit-scrollbar {
   display: none;
 }
@@ -1418,21 +1494,24 @@ h1, h2, h3, h4 {
 
 .neon-bar-val {
   font-family: var(--font-display);
-  font-size: 1.25rem; /* Shrunk slightly */
+  font-size: 1.6rem; /* Increased size for prominence */
   font-weight: 800;
   color: #fff;
   margin-bottom: 24px;
   text-shadow: 0 0 15px rgba(0, 230, 118, 0.9), 0 0 30px rgba(79, 195, 247, 0.6);
   opacity: 0;
-  transform: translateZ(30px);
+  transform: translateZ(30px) scaleY(1.1); /* Slightly taller to match Bebas Neue style */
+  letter-spacing: 0.05em;
 }
 
 .neon-bar-year {
   font-family: var(--font-mono);
-  font-size: 0.9rem; /* Shrunk slightly */
-  color: var(--text-primary);
+  font-size: 1rem; /* Slightly larger as requested */
+  font-weight: 700; /* Bolder as requested */
+  color: #ffffff !important; /* Force to white only, even in light mode */
   margin-top: 20px;
   transform: translateZ(10px);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4); /* Subtle shadow for readability on light backgrounds */
 }
 
 /* THE 3D PILLAR */

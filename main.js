@@ -1,159 +1,85 @@
 
-// utils.js — helper functions used across the whole app
+// ── UTILITIES ──
+const $ = id => document.getElementById(id);
+const $$ = selector => document.querySelectorAll(selector);
+const show = el => el?.classList.remove("hidden");
+const hide = el => el?.classList.add("hidden");
 
-
-// formats ISO date string into readable format
-// e.g. "2024-03-15T10:30:00Z" -> "15 MAR 2024"
 function formatDate(isoString) {
   if (!isoString) return "—";
   const d = new Date(isoString);
-  return d.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).toUpperCase();
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
 }
 
-// returns how long ago a launch was, or how far away it is
-// e.g. "3 years ago" or "in 4 days"
 function timeFromNow(isoString) {
   if (!isoString) return "—";
   const now = Date.now();
   const then = new Date(isoString).getTime();
-  const diff = then - now; // positive = future, negative = past
+  const diff = then - now;
   const abs = Math.abs(diff);
-
   const mins = Math.floor(abs / 60000);
   const hours = Math.floor(abs / 3600000);
   const days = Math.floor(abs / 86400000);
   const months = Math.floor(days / 30);
   const years = Math.floor(days / 365);
-
   let str;
-  if (years > 0)        str = `${years} year${years > 1 ? "s" : ""}`;
-  else if (months > 0)  str = `${months} month${months > 1 ? "s" : ""}`;
-  else if (days > 0)    str = `${days} day${days > 1 ? "s" : ""}`;
-  else if (hours > 0)   str = `${hours} hour${hours > 1 ? "s" : ""}`;
-  else                  str = `${mins} min${mins > 1 ? "s" : ""}`;
-
+  if (years > 0) str = `${years} year${years > 1 ? "s" : ""}`;
+  else if (months > 0) str = `${months} month${months > 1 ? "s" : ""}`;
+  else if (days > 0) str = `${days} day${days > 1 ? "s" : ""}`;
+  else if (hours > 0) str = `${hours} hour${hours > 1 ? "s" : ""}`;
+  else str = `${mins} min${mins > 1 ? "s" : ""}`;
   return diff < 0 ? `${str} ago` : `in ${str}`;
 }
 
-// extracts just the year from an ISO string
-function getYear(isoString) {
-  if (!isoString) return null;
-  return new Date(isoString).getFullYear();
-}
+function getYear(isoString) { return isoString ? new Date(isoString).getFullYear() : null; }
 
-// get current UTC time as HH:MM:SS string
 function getISTString() {
-  const options = {
-    timeZone: 'Asia/Kolkata',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  };
-  const time = new Intl.DateTimeFormat('en-IN', options).format(new Date());
-  return `${time} IST`;
+  return new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(new Date()) + " IST";
 }
 
-// calculates T-minus breakdown from a future ISO date
 function getTMinus(isoString) {
   const diff = new Date(isoString).getTime() - Date.now();
   if (diff <= 0) return null;
-
   const totalSeconds = Math.floor(diff / 1000);
-  const days    = Math.floor(totalSeconds / 86400);
-  const hours   = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
   return {
-    days:    String(days).padStart(2, "0"),
-    hours:   String(hours).padStart(2, "0"),
-    minutes: String(minutes).padStart(2, "0"),
-    seconds: String(seconds).padStart(2, "0"),
+    days: String(Math.floor(totalSeconds / 86400)).padStart(2, "0"),
+    hours: String(Math.floor((totalSeconds % 86400) / 3600)).padStart(2, "0"),
+    minutes: String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0"),
+    seconds: String(totalSeconds % 60).padStart(2, "0"),
   };
 }
 
-
-// converts lat/lng to x,y,z position on a sphere
-// used by globe.js to place launch site pins
-// radius should match whatever sphere radius Three.js uses
 function latLngToXYZ(lat, lng, radius) {
-  const phi   = (90 - lat) * (Math.PI / 180);
+  const phi = (90 - lat) * (Math.PI / 180);
   const theta = (lng + 180) * (Math.PI / 180);
-
-  const x = -(radius * Math.sin(phi) * Math.cos(theta));
-  const y =   radius * Math.cos(phi);
-  const z =   radius * Math.sin(phi) * Math.sin(theta);
-
-  return { x, y, z };
+  return {
+    x: -(radius * Math.sin(phi) * Math.cos(theta)),
+    y: radius * Math.cos(phi),
+    z: radius * Math.sin(phi) * Math.sin(theta)
+  };
 }
 
-
-// groups an array of launches by year
-// returns an object like { 2020: [...], 2021: [...], ... }
 function groupByYear(launches) {
   return launches.reduce((acc, launch) => {
     const year = getYear(launch.date);
-    if (!year) return acc;
-    if (!acc[year]) acc[year] = [];
-    acc[year].push(launch);
+    if (year) (acc[year] = acc[year] || []).push(launch);
     return acc;
   }, {});
 }
 
-// gets unique agencies from shaped launch data
-function getUniqueAgencies(launches) {
-  const names = launches.map(l => l.rocketName);
-  return [...new Set(names)].sort();
-}
-
-// success rate as a percentage string e.g. "94.2%"
 function calcSuccessRate(launches) {
   const completed = launches.filter(l => l.success !== null && l.success !== undefined && !l.upcoming);
   if (completed.length === 0) return "—";
-  const successes = completed.filter(l => l.success === true).length;
-  return ((successes / completed.length) * 100).toFixed(1) + "%";
+  return ((completed.filter(l => l.success === true).length / completed.length) * 100).toFixed(1) + "%";
 }
 
-// formats payload mass nicely
-// e.g. 12500 -> "12,500 kg"
-function formatMass(kg) {
-  if (!kg) return "—";
-  return kg.toLocaleString() + " kg";
-}
+function formatMass(kg) { return kg ? kg.toLocaleString() + " kg" : "—"; }
 
-// figures out status string from a launch object
 function getLaunchStatus(launch) {
   if (launch.upcoming) return "upcoming";
-  if (launch.success === true) return "success";
-  if (launch.success === false) return "failed";
-  return "unknown";
+  return launch.success ? "success" : "failed";
 }
 
-
-function $(id) {
-  return document.getElementById(id);
-}
-
-function $$(selector) {
-  return document.querySelectorAll(selector);
-}
-
-// show/hide element by toggling the hidden class
-function show(el) {
-  if (el) el.classList.remove("hidden");
-}
-
-function hide(el) {
-  if (el) el.classList.add("hidden");
-}
-
-// used on the search input
-// Limits how frequently a function is executed. 
 function debounce(fn, delay = 300) {
   let timer;
   return function (...args) {
@@ -162,71 +88,18 @@ function debounce(fn, delay = 300) {
   };
 }
 
-
-
-// api.js — all fetch calls live here, nothing else
-
+// ── DATA FETCHING ──
 const BASE_URL = "https://api.spacexdata.com/v4";
-
-// just a wrapper so i dont repeat try/catch everywhere
 async function fetchData(endpoint) {
-  const res = await fetch(`${BASE_URL}${endpoint}`);
-  if (!res.ok) throw new Error(`API error: ${res.status} on ${endpoint}`);
-  return res.json();
+    const res = await fetch(`${BASE_URL}${endpoint}`);
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    return res.json();
 }
 
-// get all launches — past + upcoming combined
-async function getAllLaunches() {
-  const data = await fetchData("/launches");
-  return data;
-}
-
-// upcoming only
-async function getUpcomingLaunches() {
-  const data = await fetchData("/launches/upcoming");
-  return data;
-}
-
-// single launch by id
-async function getLaunchById(id) {
-  const data = await fetchData(`/launches/${id}`);
-  return data;
-}
-
-// all rockets
-async function getRockets() {
-  const data = await fetchData("/rockets");
-  return data;
-}
-
-// all launchpads — we need coordinates for the globe
-async function getLaunchpads() {
-  const data = await fetchData("/launchpads");
-  return data;
-}
-
-// crew members
-async function getCrew() {
-  const data = await fetchData("/crew");
-  return data;
-}
-
-// payloads — for orbit type and mass
-async function getPayloads() {
-  const data = await fetchData("/payloads");
-  return data;
-}
-
-// this is the big one — fetches everything in parallel
-// so we dont make 6 sequential requests and waste time
 async function fetchAllData() {
   const [launches, rockets, launchpads, payloads] = await Promise.all([
-    getAllLaunches(),
-    getRockets(),
-    getLaunchpads(),
-    getPayloads(),
+    fetchData("/launches"), fetchData("/rockets"), fetchData("/launchpads"), fetchData("/payloads")
   ]);
-
   return { launches, rockets, launchpads, payloads };
 }
 
@@ -234,25 +107,12 @@ function shapeLaunchData(launches, rockets, launchpads, payloads) {
   return launches.map(launch => {
     const rocket = rockets.find(r => r.id === launch.rocket) || {};
     const pad = launchpads.find(p => p.id === launch.launchpad) || {};
-
-    const payloadId = launch.payloads?.[0];
-    const payload = payloads.find(p => p.id === payloadId) || {};
-
+    const payload = payloads.find(p => p.id === launch.payloads?.[0]) || {};
     return {
-      id: launch.id,
-      name: launch.name,
+      ...launch,
       date: launch.date_utc,
-      upcoming: launch.upcoming,
-      success: launch.success,
-      details: launch.details,
-      flightNumber: launch.flight_number,
-      links: launch.links,
-
-      // rocket info
       rocketName: rocket.name || "Unknown",
       rocketType: rocket.type || "—",
-
-      // launchpad info
       siteName: pad.name || "Unknown",
       siteFullName: pad.full_name || "—",
       siteLat: pad.latitude || null,
@@ -260,1808 +120,456 @@ function shapeLaunchData(launches, rockets, launchpads, payloads) {
       siteRegion: pad.region || "—",
       siteLaunchAttempts: pad.launch_attempts || 0,
       siteLaunchSuccesses: pad.launch_successes || 0,
-
-      // payload info
       payloadMass: payload.mass_kg || null,
       orbit: payload.orbit || "—",
       manufacturer: payload.manufacturers?.[0] || "—",
       nationality: payload.nationalities?.[0] || "—",
-
-      // crew
-      crewIds: launch.crew || [],
     };
   });
 }
 
-
-
-// render.js — takes data, puts it on the screen
-
-
-
-
+// ── RENDER LOGIC ──
 function renderStats(launches) {
-  const total    = launches.length;
-  const upcoming = launches.filter(l => l.upcoming).length;
-  const rate     = calcSuccessRate(launches);
-  const rockets  = [...new Set(launches.map(l => l.rocketName))].length;
-
-  // count unique agencies by nationality — rough but works
+  const total = launches.length, upcoming = launches.filter(l => l.upcoming).length;
+  const rate = calcSuccessRate(launches), rockets = [...new Set(launches.map(l => l.rocketName))].length;
   const agencies = [...new Set(launches.map(l => l.nationality).filter(Boolean))].length;
-
-  $("stat-total").textContent    = total.toLocaleString();
-  $("stat-success").textContent  = rate;
+  $("stat-total").textContent = total.toLocaleString();
+  $("stat-success").textContent = rate;
   $("stat-upcoming").textContent = upcoming;
   $("stat-agencies").textContent = agencies || "6+";
-  $("stat-rockets").textContent  = rockets;
+  $("stat-rockets").textContent = rockets;
 }
-
-
-function renderHero(launch) {
-  if (!launch) return;
-
-  $("hero-mission-name").textContent = launch.name;
-  $("hero-agency").textContent       = launch.rocketName;
-  $("hero-rocket").textContent       = launch.rocketType || "—";
-  $("hero-site").textContent         = launch.siteName;
-}
-
 
 function createLaunchCard(launch) {
   const status = getLaunchStatus(launch);
-  const card   = document.createElement("div");
+  const card = document.createElement("div");
   card.className = "launch-card";
   card.dataset.id = launch.id;
-
-  // patch image — spacex provides mission images
   const img = launch.links?.patch?.small || "";
-
   card.innerHTML = `
     <div class="card-top">
-      <div class="card-patch">
-        ${img
-          ? `<img src="${img}" alt="${launch.name} patch" loading="lazy" />`
-          : `<img src="assets/logo.png" alt="Placeholder patch" loading="lazy" class="placeholder-patch" />`
-        }
-      </div>
-      <button class="card-fav-btn" data-id="${launch.id}" aria-label="Save mission">♡</button>
+      <div class="card-patch">${img ? `<img src="${img}" loading="lazy" />` : `<img src="assets/logo.png" class="placeholder-patch" />`}</div>
+      <button class="card-fav-btn" data-id="${launch.id}">♡</button>
     </div>
-
     <div class="card-body">
-      <div class="card-header-row">
-        <span class="card-flight">#${launch.flightNumber}</span>
-        <span class="badge badge-${status}">${status.toUpperCase()}</span>
-      </div>
-
+      <div class="card-header-row"><span class="card-flight">#${launch.flightNumber}</span><span class="badge badge-${status}">${status.toUpperCase()}</span></div>
       <h3 class="card-name">${launch.name}</h3>
-
       <div class="card-meta">
-        <span class="card-meta-item">
-          <span class="meta-icon"><img src="assets/Spaceship.png" class="meta-icon-img" alt="Rocket" /></span> ${launch.rocketName}
-        </span>
-        <span class="card-meta-item">
-          <span class="meta-icon"><img src="assets/location.png" class="meta-icon-img" alt="Location" /></span> ${launch.siteName}
-        </span>
-        <span class="card-meta-item">
-          <span class="meta-icon"><img src="assets/callender.png" class="meta-icon-img" alt="Date" /></span> ${formatDate(launch.date)}
-        </span>
-        ${launch.orbit !== "—" ? `
-        <span class="card-meta-item">
-          <span class="meta-icon">🛸</span> ${launch.orbit}
-        </span>` : ""}
+        <span class="card-meta-item">🚀 ${launch.rocketName}</span>
+        <span class="card-meta-item">📍 ${launch.siteName}</span>
+        <span class="card-meta-item">📅 ${formatDate(launch.date)}</span>
       </div>
-
-      ${launch.details ? `
-      <p class="card-details">${launch.details.slice(0, 100)}${launch.details.length > 100 ? "..." : ""}</p>
-      ` : ""}
     </div>
-
     <div class="card-footer">
       <span class="card-time">${timeFromNow(launch.date)}</span>
       <button class="card-view-btn" data-id="${launch.id}">VIEW →</button>
     </div>
   `;
-
   return card;
 }
 
 function renderLaunchCards(launches) {
-  const grid = $("launches-grid");
-  grid.innerHTML = "";
-
-  if (launches.length === 0) {
-    show($("empty-state"));
-    hide($("pagination"));
-    return;
-  }
-
+  const grid = $("launches-grid"); grid.innerHTML = "";
+  if (!launches.length) { show($("empty-state")); hide($("pagination")); return; }
   hide($("empty-state"));
-
-  launches.forEach(launch => {
-    const card = createLaunchCard(launch);
-    grid.appendChild(card);
-  });
-
-  // update count label
+  launches.forEach(l => grid.appendChild(createLaunchCard(l)));
   $("launch-count").textContent = `${launches.length} mission${launches.length !== 1 ? "s" : ""}`;
 }
 
-// clears skeletons and replaces with real cards
-function clearSkeletons() {
-  const skeletons = document.querySelectorAll(".skeleton-card");
-  skeletons.forEach(s => s.remove());
-}
-
-
 function renderPagination(currentPage, totalPages) {
-  const container = $("page-numbers");
-  container.innerHTML = "";
-
-  if (totalPages <= 1) {
-    hide($("pagination"));
-    return;
-  }
-
-  show($("pagination"));
-
-  // show max 5 page numbers at a time
-  let start = Math.max(1, currentPage - 2);
-  let end   = Math.min(totalPages, start + 4);
-  if (end - start < 4) start = Math.max(1, end - 4);
-
-  for (let i = start; i <= end; i++) {
-    const btn = document.createElement("button");
-    btn.className = `page-num${i === currentPage ? " active" : ""}`;
-    btn.textContent = i;
-    btn.dataset.page = i;
-    container.appendChild(btn);
-  }
-
-  $("page-prev").disabled = currentPage === 1;
-  $("page-next").disabled = currentPage === totalPages;
+    const container = $("page-numbers"); container.innerHTML = "";
+    if (totalPages <= 1) { hide($("pagination")); return; }
+    show($("pagination"));
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(totalPages, start + 4);
+    if (end - start < 4) start = Math.max(1, end - 4);
+    for (let i = start; i <= end; i++) {
+        const btn = document.createElement("button");
+        btn.className = `page-num${i === currentPage ? " active" : ""}`;
+        btn.textContent = i; btn.dataset.page = i;
+        container.appendChild(btn);
+    }
 }
-
-
-function renderModal(launch) {
-  const status = getLaunchStatus(launch);
-
-  $("modal-badge").textContent        = status.toUpperCase();
-  $("modal-badge").className          = `modal-badge badge badge-${status}`;
-  $("modal-mission-name").textContent = launch.name;
-  $("modal-rocket").textContent       = launch.rocketName;
-  $("modal-date").textContent         = formatDate(launch.date);
-  $("modal-site").textContent         = launch.siteFullName || launch.siteName;
-  $("modal-orbit").textContent        = launch.orbit;
-  $("modal-mass").textContent         = formatMass(launch.payloadMass);
-  $("modal-flight").textContent       = `#${launch.flightNumber}`;
-
-  // wikipedia link
-  const wikiLink = $("modal-wiki-link");
-  if (launch.links?.wikipedia) {
-    wikiLink.href = launch.links.wikipedia;
-    show(wikiLink);
-  } else {
-    hide(wikiLink);
-  }
-
-  // fav button state
-  const saved = getSavedIds();
-  const favBtn = $("modal-fav-btn");
-  favBtn.textContent = saved.includes(launch.id) ? "♥ SAVED" : "♡ SAVE MISSION";
-  favBtn.dataset.id  = launch.id;
-
-  // extra details — crew, article, youtube
-  const details = $("modal-details");
-  details.innerHTML = "";
-
-  if (launch.details) {
-    const p = document.createElement("p");
-    p.className = "modal-description";
-    p.textContent = launch.details;
-    details.appendChild(p);
-  }
-
-  if (launch.links?.article) {
-    const a = document.createElement("a");
-    a.href = launch.links.article;
-    a.target = "_blank";
-    a.rel = "noopener";
-    a.className = "modal-link";
-    a.textContent = "READ ARTICLE →";
-    details.appendChild(a);
-  }
-
-  if (launch.links?.webcast) {
-    const a = document.createElement("a");
-    a.href = launch.links.webcast;
-    a.target = "_blank";
-    a.rel = "noopener";
-    a.className = "modal-link";
-    a.textContent = "WATCH WEBCAST →";
-    details.appendChild(a);
-  }
-
-  show($("modal-overlay"));
-}
-
-function closeModal() {
-  hide($("modal-overlay"));
-}
-
 
 function renderAgencies(launches) {
-  const grid = $("agencies-grid");
-  grid.innerHTML = "";
-
-  // group by rocket name as a proxy for agency
+  const grid = $("agencies-grid"); grid.innerHTML = "";
   const rocketNames = [...new Set(launches.map(l => l.rocketName))];
-
   rocketNames.forEach(name => {
-    const group    = launches.filter(l => l.rocketName === name);
-    const total    = group.length;
-    const successes = group.filter(l => l.success === true).length;
-    const rate     = total > 0 ? ((successes / group.filter(l => !l.upcoming).length) * 100).toFixed(0) : "—";
-
+    const group = launches.filter(l => l.rocketName === name);
+    const total = group.length;
+    const rate = total > 0 ? ((group.filter(l => l.success === true).length / group.filter(l => !l.upcoming).length) * 100).toFixed(0) : "—";
     const card = document.createElement("div");
     card.className = "agency-card";
     card.innerHTML = `
       <div class="agency-name">${name}</div>
       <div class="agency-stats">
-        <div class="agency-stat">
-          <span class="agency-stat-val">${total}</span>
-          <span class="agency-stat-label">LAUNCHES</span>
-        </div>
-        <div class="agency-stat">
-          <span class="agency-stat-val">${rate}%</span>
-          <span class="agency-stat-label">SUCCESS</span>
-        </div>
+        <div class="agency-stat"><span class="agency-stat-val">${total}</span><span class="agency-stat-label">LAUNCHES</span></div>
+        <div class="agency-stat"><span class="agency-stat-val">${rate}%</span><span class="agency-stat-label">SUCCESS</span></div>
       </div>
-      <div class="agency-bar-wrap">
-        <div class="agency-bar" style="width: ${rate}%"></div>
-      </div>
+      <div class="agency-bar-wrap"><div class="agency-bar" style="width: ${rate}%"></div></div>
     `;
     grid.appendChild(card);
   });
 }
 
-// drawing a simple bar chart with SVG — no libraries
-
 function renderTimeline(launches) {
-  const container = $("timeline-chart");
-  container.innerHTML = "";
-
-  const byYear = groupByYear(launches);
-  const years  = Object.keys(byYear).sort();
-
-  if (years.length === 0) return;
-
+  const container = $("timeline-chart"); container.innerHTML = "";
+  const byYear = groupByYear(launches), years = Object.keys(byYear).sort();
+  if (!years.length) return;
   const maxCount = Math.max(...years.map(y => byYear[y].length));
-
   years.forEach((year) => {
-    const count = byYear[year].length;
-    // Map maxCount to strictly 80% to prevent flexbox clipping, guaranteeing true proportional heights
-    const heightPercent = (count / maxCount) * 80; 
-
-    const wrap = document.createElement("div");
-    wrap.className = "neon-bar-wrap";
-
-    const valEl = document.createElement("div");
-    valEl.className = "neon-bar-val";
-    valEl.textContent = "0";
-
-    const barEl = document.createElement("div");
-    barEl.className = "neon-bar-3d";
-    // Do not set inline height yet. We'll store it in a data attribute
-    barEl.dataset.targetHeightPercent = heightPercent;
-    barEl.dataset.targetCount = count;
-    barEl.innerHTML = `
-      <div class="face front"></div>
-      <div class="face right"></div>
-      <div class="face top"></div>
+    const count = byYear[year].length, heightPercent = (count / maxCount) * 80;
+    const wrap = document.createElement("div"); wrap.className = "neon-bar-wrap";
+    wrap.innerHTML = `
+      <div class="neon-bar-val">0</div>
+      <div class="neon-bar-3d" data-target-height-percent="${heightPercent}" data-target-count="${count}">
+        <div class="face front"></div><div class="face right"></div><div class="face top"></div>
+      </div>
+      <div class="neon-bar-year">${year}</div>
     `;
-
-    const yearEl = document.createElement("div");
-    yearEl.className = "neon-bar-year";
-    yearEl.textContent = year;
-
-    wrap.appendChild(valEl);
-    wrap.appendChild(barEl);
-    wrap.appendChild(yearEl);
     container.appendChild(wrap);
   });
 }
 
+// ── STATE MANAGEMENT ──
+const state = { allLaunches: [], filteredLaunches: [], currentPage: 1, perPage: 12, selectedLaunch: null };
 
-function getSavedIds() {
-  return JSON.parse(localStorage.getItem("orion-favorites") || "[]");
-}
-
-function saveFavorite(id) {
-  const saved = getSavedIds();
-  if (!saved.includes(id)) {
-    saved.push(id);
-    localStorage.setItem("orion-favorites", JSON.stringify(saved));
-  }
-}
-
-function removeFavorite(id) {
-  const saved = getSavedIds().filter(s => s !== id);
-  localStorage.setItem("orion-favorites", JSON.stringify(saved));
-}
-
+function getSavedIds() { return JSON.parse(localStorage.getItem("orion-favorites") || "[]"); }
 function toggleFavorite(id) {
-  const saved = getSavedIds();
-  if (saved.includes(id)) {
-    removeFavorite(id);
-    return false; // removed
-  } else {
-    saveFavorite(id);
-    return true; // added
-  }
+  let saved = getSavedIds(), index = saved.indexOf(id);
+  if (index > -1) saved.splice(index, 1); else saved.push(id);
+  localStorage.setItem("orion-favorites", JSON.stringify(saved));
+  return index === -1;
 }
 
-function renderFavorites(allLaunches) {
-  const grid  = $("favorites-grid");
-  const saved = getSavedIds();
-
-  grid.innerHTML = "";
-
-  if (saved.length === 0) {
-    show($("fav-empty-state"));
-    $("fav-count").textContent = "0 saved";
-    return;
-  }
-
-  hide($("fav-empty-state"));
-  $("fav-count").textContent = `${saved.length} saved`;
-
-  const favLaunches = allLaunches.filter(l => saved.includes(l.id));
-  favLaunches.forEach(launch => {
-    const card = createLaunchCard(launch);
-    grid.appendChild(card);
-  });
+function renderFavs() {
+    const grid = $("favorites-grid"), saved = getSavedIds(); grid.innerHTML = "";
+    if (!saved.length) { show($("fav-empty-state")); $("fav-count").textContent = "0 saved"; return; }
+    hide($("fav-empty-state")); $("fav-count").textContent = `${saved.length} saved`;
+    state.allLaunches.filter(l => saved.includes(l.id)).forEach(l => grid.appendChild(createLaunchCard(l)));
 }
 
-// updates fav button icon on a card after toggling
 function updateFavButtons(id, isSaved) {
-  document.querySelectorAll(`.card-fav-btn[data-id="${id}"]`).forEach(btn => {
-    btn.textContent = isSaved ? "♥" : "♡";
-    btn.classList.toggle("saved", isSaved);
-  });
+    $$(`.card-fav-btn[data-id="${id}"]`).forEach(btn => {
+        btn.textContent = isSaved ? "♥" : "♡"; btn.classList.toggle("saved", isSaved);
+    });
+}
+
+// ── INITIALIZATION ──
+async function init() {
+    // ── INITIALIZATION ──
+    try {
+      console.log('Orion Arc: Initializing...');
+      const data = await fetchAllData();
+      const shaped = shapeLaunchData(data.launches, data.rockets, data.launchpads, data.payloads);
+      shaped.sort((a, b) => new Date(b.date) - new Date(a.date));
+      state.allLaunches = state.filteredLaunches = shaped;
+
+      $$(".skeleton-card").forEach(s => s.remove());
+      renderStats(shaped); renderAgencies(shaped); renderTimeline(shaped); renderFavs();
+      initOrbitalVisualiser(shaped); populateAgencyFilter(shaped); renderPage(1);
+      initFilters(state, renderPage); initInteractiveText(); initScrollHero();
+      initScrollSpy(); initIntersectionObserver();
+      
+      const globeContainer = $("globe-canvas-container");
+      if (globeContainer) {
+          initGlobe(globeContainer, (pad) => { 
+              const launch = state.allLaunches.find(l => l.siteName === pad.siteName);
+              if (launch) renderModal(launch);
+          });
+      }
+
+
+      setStatusLive();
+      startClock();
+      console.log('Orion Arc: Ready');
+    } catch (err) {
+      console.error('Initialization Failed:', err);
+      setStatusError();
+    }
+}
+
+function startClock() {
+  setInterval(() => { if($("nav-clock")) $("nav-clock").textContent = getISTString(); }, 1000);
+}
+
+function renderModal(launch) {
+  const status = getLaunchStatus(launch);
+  $("modal-badge").textContent = status.toUpperCase();
+  $("modal-badge").className = `modal-badge badge badge-${status}`;
+  $("modal-mission-name").textContent = launch.name;
+  $("modal-rocket").textContent = launch.rocketName;
+  $("modal-date").textContent = formatDate(launch.date);
+  $("modal-site").textContent = launch.siteFullName;
+  $("modal-orbit").textContent = launch.orbit;
+  $("modal-mass").textContent = formatMass(launch.payloadMass);
+  $("modal-flight").textContent = `#${launch.flightNumber}`;
+
+  const wiki = $("modal-wiki-link");
+  if (launch.links?.wikipedia) { wiki.href = launch.links.wikipedia; show(wiki); } else hide(wiki);
+
+  const favBtn = $("modal-fav-btn");
+  favBtn.textContent = getSavedIds().includes(launch.id) ? "♥ SAVED" : "♡ SAVE MISSION";
+  favBtn.dataset.id = launch.id;
+
+  const details = $("modal-details");
+  details.innerHTML = (launch.details ? `<p class="modal-description">${launch.details}</p>` : "") +
+    (launch.links?.article ? `<a href="${launch.links.article}" target="_blank" class="modal-link">READ ARTICLE →</a>` : "") +
+    (launch.links?.webcast ? `<a href="${launch.links.webcast}" target="_blank" class="modal-link">WATCH WEBCAST →</a>` : "");
+
+  show($("modal-overlay"));
+}
+
+function renderPage(page) {
+    state.currentPage = page;
+    const slice = state.filteredLaunches.slice((page-1)*state.perPage, page*state.perPage);
+    renderLaunchCards(slice);
+    renderPagination(page, Math.ceil(state.filteredLaunches.length / state.perPage));
+    $$(".launch-card").forEach((c, i) => setTimeout(() => c.classList.add("visible"), i * 50));
+    if (page > 1) $("launches").scrollIntoView({ behavior: "smooth" });
+}
+
+// ── CUSTOM VISUALS ──
+function initInteractiveText() {
+    const container = $("reveal-text"); if (!container) return;
+    const text = "ORION ARC";
+    container.innerHTML = text.split('').map((char, i) => char === ' ' ? '<span style="display:inline-block; width:0.3em;">&nbsp;</span>' : `
+        <span class="letter-wrap" data-index="${i}">
+            <span class="letter-base">${char}</span>
+            <span class="letter-overlay">${char}</span>
+        </span>`).join('');
+    $$(".letter-wrap").forEach((l, i) => setTimeout(() => l.classList.add('spring-in'), i * 80));
+}
+
+function initScrollHero() {
+    const video = $("hero-video"), section = $("hero-scroll"); if (!video || !section) return;
+    window.addEventListener('scroll', () => {
+        const progress = Math.max(0, Math.min(1, (window.scrollY - section.offsetTop) / (section.offsetHeight - window.innerHeight)));
+        requestAnimationFrame(() => {
+            if (video.duration) video.currentTime = progress * video.duration;
+            const text = document.querySelector('.reveal-text-container');
+            if (text) {
+                text.style.transform = `scale(${1 + progress * 0.45})`;
+                text.style.opacity = 1 - Math.max(0, progress - 0.25) * 1.5;
+            }
+        });
+    });
+}
+
+function initIntersectionObserver() {
+    const observer = new IntersectionObserver(entries => entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add("visible"); observer.unobserve(e.target); }
+    }), { threshold: 0.1 });
+    $$(".section-title, .agency-card").forEach(el => observer.observe(el));
+
+    const tlObserver = new IntersectionObserver(entries => entries.forEach(e => {
+        if (e.isIntersecting) {
+            const wraps = $$(".neon-bar-wrap");
+            let start = null;
+            function run(now) {
+                if (!start) start = now;
+                const p = Math.min((now - start) / 2500, 1);
+                const ease = 1 - Math.pow(1 - p, 4);
+                wraps.forEach(w => {
+                    const bar = w.querySelector(".neon-bar-3d"), val = w.querySelector(".neon-bar-val");
+                    bar.style.height = `${bar.dataset.targetHeightPercent * ease}%`;
+                    val.textContent = Math.floor(bar.dataset.targetCount * ease);
+                    val.style.opacity = Math.min(p * 2, 1);
+                });
+                if (p < 1) requestAnimationFrame(run);
+            }
+            requestAnimationFrame(run);
+            tlObserver.unobserve(e.target);
+        }
+    }), { threshold: 0.4 });
+    if ($("timeline")) tlObserver.observe($("timeline"));
+}
+
+// ── GLOBE (Three.js) ──
+let globeScene, globeCamera, globeRenderer, globeEarth, globeAtmosphere, globePins = [], globeRaycaster = new THREE.Raycaster(), globeMouse = new THREE.Vector2();
+
+function initGlobe(container, onClick) {
+    if (!container || !window.THREE) return;
+    globeScene = new THREE.Scene();
+    globeCamera = new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, 0.1, 1000);
+    globeCamera.position.z = 14;
+    globeRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    globeRenderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(globeRenderer.domElement);
+    globeScene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(5,3,5); globeScene.add(sun);
+    
+    const geo = new THREE.SphereGeometry(5, 64, 64);
+    const texture = new THREE.TextureLoader().load("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg");
+    globeEarth = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ map: texture })); globeScene.add(globeEarth);
+
+    const atmosphereGeo = new THREE.SphereGeometry(5.2, 64, 64);
+    globeAtmosphere = new THREE.Mesh(atmosphereGeo, new THREE.MeshPhongMaterial({ color: 0x4fc3f7, transparent: true, opacity: 0.1 })); globeScene.add(globeAtmosphere);
+
+    function loop() { requestAnimationFrame(loop); globeEarth.rotation.y += 0.001; globeAtmosphere.rotation.y += 0.001; globeRenderer.render(globeScene, globeCamera); }
+    loop();
 }
 
 
-function setStatusLive() {
-  const dot   = $("status-dot");
-  const label = $("status-label");
-  dot.classList.add("live");
-  dot.classList.remove("error");
-  label.textContent = "LIVE DATA";
-}
-
-function setStatusError() {
-  const dot   = $("status-dot");
-  const label = $("status-label");
-  dot.classList.add("error");
-  dot.classList.remove("live");
-  label.textContent = "API ERROR";
-}
-
-
-
-// filters.js — search, filter, sort — all using HOFs
-// this is where .map .filter .sort .find .reduce all live
-
-
-
-
-
+// ── REMAINING LOGIC ──
 function filterBySearch(launches, query) {
-  if (!query || query.trim() === "") return launches;
+  if (!query) return launches;
   const q = query.toLowerCase().trim();
-  return launches.filter(l =>
-    l.name.toLowerCase().includes(q)       ||
-    l.rocketName.toLowerCase().includes(q) ||
-    l.siteName.toLowerCase().includes(q)   ||
-    l.orbit?.toLowerCase().includes(q)     ||
-    String(l.flightNumber).includes(q)
-  );
+  return launches.filter(l => l.name.toLowerCase().includes(q) || l.rocketName.toLowerCase().includes(q) || l.siteName.toLowerCase().includes(q));
 }
 
 function filterByAgency(launches, agency) {
-  if (!agency || agency === "all") return launches;
-  return launches.filter(l => l.rocketName === agency);
+  return (!agency || agency === "all") ? launches : launches.filter(l => l.rocketName === agency);
 }
 
 function filterByStatus(launches, status) {
   if (!status || status === "all") return launches;
   if (status === "upcoming") return launches.filter(l => l.upcoming === true);
-  if (status === "success")  return launches.filter(l => l.success === true && !l.upcoming);
-  if (status === "failed")   return launches.filter(l => l.success === false && !l.upcoming);
+  if (status === "success") return launches.filter(l => l.success === true && !l.upcoming);
+  if (status === "failed") return launches.filter(l => l.success === false && !l.upcoming);
   return launches;
 }
 
 function filterByOrbit(launches, orbit) {
-  if (!orbit || orbit === "all") return launches;
-  return launches.filter(l => l.orbit === orbit);
+  return (!orbit || orbit === "all") ? launches : launches.filter(l => l.orbit === orbit);
 }
-
 
 function sortLaunches(launches, sortVal) {
-  // spread to avoid mutating the original array
   const arr = [...launches];
-
-  switch (sortVal) {
-    case "date-desc":
-      return arr.sort((a, b) => new Date(b.date) - new Date(a.date));
-    case "date-asc":
-      return arr.sort((a, b) => new Date(a.date) - new Date(b.date));
-    case "mass-desc":
-      return arr.sort((a, b) => (b.payloadMass || 0) - (a.payloadMass || 0));
-    case "mass-asc":
-      return arr.sort((a, b) => (a.payloadMass || 0) - (b.payloadMass || 0));
-    case "name-asc":
-      return arr.sort((a, b) => a.name.localeCompare(b.name));
-    default:
-      return arr;
-  }
+  if (sortVal === "date-asc") return arr.sort((a, b) => new Date(a.date) - new Date(b.date));
+  if (sortVal === "name-asc") return arr.sort((a, b) => a.name.localeCompare(b.name));
+  return arr.sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
-
-function renderActivePills(filters) {
-  const container = $("active-filters");
-  if (!container) return;
-  container.innerHTML = "";
-
-  const labels = {
-    search: `"${filters.search}"`,
-    agency: filters.agency,
-    status: filters.status,
-    orbit:  filters.orbit,
-  };
-
-  Object.entries(labels).forEach(([key, val]) => {
-    if (!val || val === "all") return;
-
-    const pill = document.createElement("div");
-    pill.className = "filter-pill";
-    pill.innerHTML = `
-      <span>${val.toUpperCase()}</span>
-      <span class="filter-pill-remove" data-key="${key}">✕</span>
-    `;
-    container.appendChild(pill);
-  });
-}
-
-// chains all filter + sort functions together
-// this runs every time any filter/sort/search changes
-
-function applyFilters(state, renderPage) {
-  const query  = $("search-input")?.value   || "";
-  const agency = $("filter-agency")?.value  || "all";
-  const status = $("filter-status")?.value  || "all";
-  const orbit  = $("filter-orbit")?.value   || "all";
-  const sort   = $("sort-select")?.value    || "date-desc";
+function applyFilters() {
+  const query = $("search-input")?.value || "";
+  const agency = $("filter-agency")?.value || "all";
+  const status = $("filter-status")?.value || "all";
+  const orbit = $("filter-orbit")?.value || "all";
+  const sort = $("sort-select")?.value || "date-desc";
 
   let result = state.allLaunches;
   result = filterBySearch(result, query);
   result = filterByAgency(result, agency);
   result = filterByStatus(result, status);
   result = filterByOrbit(result, orbit);
-  result = sortLaunches(result, sort);
-
-  state.filteredLaunches = result;
-
-  // update active filter pills
-  renderActivePills({ search: query, agency, status, orbit });
-
-  // go back to page 1 whenever filters change
+  state.filteredLaunches = sortLaunches(result, sort);
   renderPage(1);
 }
 
-
 function initFilters(state, renderPage) {
-  const debouncedSearch = debounce(() => applyFilters(state, renderPage), 300);
-
-  $("search-input")?.addEventListener("input", debouncedSearch);
-
-  // clear button on search
-  $("search-clear")?.addEventListener("click", () => {
-    $("search-input").value = "";
-    applyFilters(state, renderPage);
-  });
-
-  // dropdowns fire immediately — no debounce needed
-  $("filter-agency")?.addEventListener("change", () => applyFilters(state, renderPage));
-  $("filter-status")?.addEventListener("change", () => applyFilters(state, renderPage));
-  $("filter-orbit")?.addEventListener("change",  () => applyFilters(state, renderPage));
-  $("sort-select")?.addEventListener("change",   () => applyFilters(state, renderPage));
-
-  // remove individual filter pills
-  $("active-filters")?.addEventListener("click", e => {
-    const btn = e.target.closest(".filter-pill-remove");
-    if (!btn) return;
-
-    const key = btn.dataset.key;
-    if (key === "search") $("search-input").value  = "";
-    if (key === "agency") $("filter-agency").value = "all";
-    if (key === "status") $("filter-status").value = "all";
-    if (key === "orbit")  $("filter-orbit").value  = "all";
-
-    applyFilters(state, renderPage);
-  });
+    const run = debounce(applyFilters);
+    $("search-input")?.addEventListener("input", run);
+    $("filter-agency")?.addEventListener("change", applyFilters);
+    $("filter-status")?.addEventListener("change", applyFilters);
+    $("filter-orbit")?.addEventListener("change", applyFilters);
+    $("sort-select")?.addEventListener("change", applyFilters);
 }
 
-
-
-
-
-
-let countdownInterval = null;
-
-// call this with the launch date ISO string
-function initCountdown(launchDateISO) {
-  // clear any existing interval first
-  if (countdownInterval) clearInterval(countdownInterval);
-
-  const cdDays    = $("cd-days");
-  const cdHours   = $("cd-hours");
-  const cdMinutes = $("cd-minutes");
-  const cdSeconds = $("cd-seconds");
-
-  if (!cdDays || !cdHours || !cdMinutes || !cdSeconds) return;
-
-  function tick() {
-    const t = getTMinus(launchDateISO);
-
-    if (!t) {
-      // launch has passed
-      cdDays.textContent    = "00";
-      cdHours.textContent   = "00";
-      cdMinutes.textContent = "00";
-      cdSeconds.textContent = "00";
-      clearInterval(countdownInterval);
-      return;
-    }
-
-    // only animate the seconds tick when value changes
-    const prevSec = cdSeconds.textContent;
-    if (prevSec !== t.seconds) {
-      cdSeconds.classList.remove("tick");
-      setTimeout(() => cdSeconds.classList.add("tick"), 10);
-    }
-
-    cdDays.textContent    = t.days;
-    cdHours.textContent   = t.hours;
-    cdMinutes.textContent = t.minutes;
-    cdSeconds.textContent = t.seconds;
-  }
-
-  // run immediately so theres no 1s delay on load
-  tick();
-  countdownInterval = setInterval(tick, 1000);
-}
-
-
-
-// globe.js — three.js earth globe
-
-
-
-const THREE = window.THREE;
-
-let scene, camera, renderer, earth, atmosphere;
-let orbitControls = null;
-let raycaster, mouse;
-let pins       = [];
-let arcs       = [];
-let launchpads = [];
-let onPinClick = null; // callback set from outside
-
-const GLOBE_RADIUS = 5;
-
-
-function initGlobe(container, onClickCallback) {
-  if (!THREE) {
-    console.warn("three.js not loaded");
-    return;
-  }
-
-  onPinClick = onClickCallback;
-
-  // scene
-  scene  = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-  camera.position.set(0, 0, 14);
-
-  // renderer
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setClearColor(0x000000, 0); // transparent bg
-  container.appendChild(renderer.domElement);
-
-  // lights
-  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
-  scene.add(ambient);
-
-  const sun = new THREE.DirectionalLight(0xffffff, 1.2);
-  sun.position.set(5, 3, 5);
-  scene.add(sun);
-
-  // earth
-  buildEarth();
-
-  // atmosphere glow
-  buildAtmosphere();
-
-  // stars background
-  buildStars();
-
-  // raycaster for click detection
-  raycaster = new THREE.Raycaster();
-  mouse     = new THREE.Vector2();
-
-  initDragRotate(container);
-
-  // click handler
-  renderer.domElement.addEventListener("click", onCanvasClick);
-
-  // resize
-  window.addEventListener("resize", () => onResize(container));
-
-  // start render loop
-  animate();
-
-  // hide the loader
-  const loader = $("globe-loader");
-  if (loader) loader.style.display = "none";
-}
-
-
-function buildEarth() {
-  const geo = new THREE.SphereGeometry(GLOBE_RADIUS, 64, 64);
-
-  const loader  = new THREE.TextureLoader();
-  const texture = loader.load(
-    "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
-    () => { /* loaded */ },
-    undefined,
-    () => {
-      // fallback if texture fails — dark blue sphere
-      earth.material.color.set(0x1a3a5c);
-    }
-  );
-
-  const mat = new THREE.MeshPhongMaterial({
-    map:       texture,
-    shininess: 8,
-  });
-
-  earth = new THREE.Mesh(geo, mat);
-  scene.add(earth);
-}
-
-
-function buildAtmosphere() {
-  const geo = new THREE.SphereGeometry(GLOBE_RADIUS * 1.04, 64, 64);
-  const mat = new THREE.MeshPhongMaterial({
-    color:       0x4fc3f7,
-    transparent: true,
-    opacity:     0.06,
-    side:        THREE.FrontSide,
-  });
-  atmosphere = new THREE.Mesh(geo, mat);
-  scene.add(atmosphere);
-}
-
-
-function buildStars() {
-  const geo = new THREE.BufferGeometry();
-  const count = 2000;
-  const positions = new Float32Array(count * 3);
-
-  for (let i = 0; i < count * 3; i++) {
-    positions[i] = (Math.random() - 0.5) * 400;
-  }
-
-  geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-
-  const mat = new THREE.PointsMaterial({
-    color: 0xffffff,
-    size:  0.25,
-    transparent: true,
-    opacity: 0.7,
-  });
-
-  const stars = new THREE.Points(geo, mat);
-  scene.add(stars);
-}
-
-
-function addPin(lat, lng, data) {
-  const pos = latLngToXYZ(lat, lng, GLOBE_RADIUS + 0.05);
-
-  const geo = new THREE.SphereGeometry(0.06, 8, 8);
-  const mat = new THREE.MeshBasicMaterial({ color: 0x4fc3f7 });
-  const pin = new THREE.Mesh(geo, mat);
-
-  pin.position.set(pos.x, pos.y, pos.z);
-  pin.userData = data; // store launchpad data on the mesh for click detection
-
-  scene.add(pin);
-  pins.push(pin);
-
-  return pin;
-}
-
-function addPins(launchpadData) {
-  // clear existing pins first
-  pins.forEach(p => scene.remove(p));
-  pins = [];
-
-  launchpadData.forEach(pad => {
-    if (!pad.siteLat || !pad.siteLng) return;
-    addPin(pad.siteLat, pad.siteLng, pad);
-  });
-
-  launchpads = launchpadData;
-}
-
-
-function addArc(lat, lng, color = 0x4fc3f7) {
-  // clear previous arcs
-  clearArcs();
-
-  const startPos = latLngToXYZ(lat, lng, GLOBE_RADIUS + 0.05);
-
-  const endPos = latLngToXYZ(lat + 15, lng + 20, GLOBE_RADIUS * 1.8);
-
-  // control point for the bezier curve — above the midpoint
-  const midLat = (lat + lat + 15) / 2;
-  const midLng = (lng + lng + 20) / 2;
-  const ctrl   = latLngToXYZ(midLat, midLng, GLOBE_RADIUS * 2.2);
-
-  const startVec = new THREE.Vector3(startPos.x, startPos.y, startPos.z);
-  const endVec   = new THREE.Vector3(endPos.x, endPos.y, endPos.z);
-  const ctrlVec  = new THREE.Vector3(ctrl.x, ctrl.y, ctrl.z);
-
-  const curve  = new THREE.QuadraticBezierCurve3(startVec, ctrlVec, endVec);
-  const points = curve.getPoints(60);
-
-  const geo = new THREE.BufferGeometry().setFromPoints(points);
-  const mat = new THREE.LineBasicMaterial({
-    color:       color,
-    transparent: true,
-    opacity:     0.8,
-  });
-
-  const arc = new THREE.Line(geo, mat);
-  scene.add(arc);
-  arcs.push(arc);
-
-  // animate the arc drawing — reveal points progressively
-  animateArc(arc, points);
-}
-
-function animateArc(arc, points) {
-  let count = 0;
-  const total = points.length;
-
-  const interval = setInterval(() => {
-    count = Math.min(count + 3, total);
-    const visible = points.slice(0, count);
-    arc.geometry.setFromPoints(visible);
-    arc.geometry.attributes.position.needsUpdate = true;
-
-    if (count >= total) clearInterval(interval);
-  }, 16);
-}
-
-function clearArcs() {
-  arcs.forEach(a => scene.remove(a));
-  arcs = [];
-}
-
-// simple mouse/touch drag to rotate globe
-
-function initDragRotate(container) {
-  let isDragging = false;
-  let prevX = 0;
-  let prevY = 0;
-  let rotX  = 0;
-  let rotY  = 0;
-
-  container.addEventListener("mousedown", e => {
-    isDragging = true;
-    prevX = e.clientX;
-    prevY = e.clientY;
-  });
-
-  window.addEventListener("mousemove", e => {
-    if (!isDragging) return;
-    const dx = e.clientX - prevX;
-    const dy = e.clientY - prevY;
-    rotY += dx * 0.005;
-    rotX += dy * 0.005;
-    // clamp vertical rotation so it doesnt flip
-    rotX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotX));
-    earth.rotation.y      = rotY;
-    earth.rotation.x      = rotX;
-    atmosphere.rotation.y = rotY;
-    atmosphere.rotation.x = rotX;
-    prevX = e.clientX;
-    prevY = e.clientY;
-  });
-
-  window.addEventListener("mouseup", () => { isDragging = false; });
-
-  // touch support
-  container.addEventListener("touchstart", e => {
-    isDragging = true;
-    prevX = e.touches[0].clientX;
-    prevY = e.touches[0].clientY;
-  });
-
-  container.addEventListener("touchmove", e => {
-    if (!isDragging) return;
-    const dx = e.touches[0].clientX - prevX;
-    const dy = e.touches[0].clientY - prevY;
-    rotY += dx * 0.005;
-    rotX += dy * 0.005;
-    rotX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotX));
-    earth.rotation.y      = rotY;
-    earth.rotation.x      = rotX;
-    atmosphere.rotation.y = rotY;
-    atmosphere.rotation.x = rotX;
-    prevX = e.touches[0].clientX;
-    prevY = e.touches[0].clientY;
-  });
-
-  container.addEventListener("touchend", () => { isDragging = false; });
-}
-
-
-function onCanvasClick(e) {
-  if (!raycaster || !pins.length) return;
-
-  const rect = renderer.domElement.getBoundingClientRect();
-  mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
-  mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
-
-  const hits = raycaster.intersectObjects(pins);
-  if (hits.length > 0 && onPinClick) {
-    const pad = hits[0].object.userData;
-    onPinClick(pad);
-
-    // highlight clicked pin
-    pins.forEach(p => p.material.color.set(0x4fc3f7));
-    hits[0].object.material.color.set(0xffab40);
-
-    // draw arc from this site
-    if (pad.siteLat && pad.siteLng) {
-      addArc(pad.siteLat, pad.siteLng);
-    }
-  }
-}
-
-
-function onResize(container) {
-  if (!camera || !renderer) return;
-  camera.aspect = container.clientWidth / container.clientHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(container.clientWidth, container.clientHeight);
-}
-
-
-function animate() {
-  requestAnimationFrame(animate);
-
-  // slow auto-rotate when not dragging
-  if (earth) earth.rotation.y += 0.0008;
-  if (atmosphere) atmosphere.rotation.y += 0.0008;
-
-  renderer.render(scene, camera);
-}
-
-
-
-// main.js — wires everything together
-
-
-
-
-
-
-
-
-// everything lives here so all functions can access it
-const state = {
-  allLaunches:     [],   // full shaped dataset
-  filteredLaunches: [],  // after search/filter/sort applied
-  currentPage:     1,
-  perPage:         12,
-  selectedLaunch:  null,
-};
-
-
-async function init() {
-  try {
-    // fetch everything in parallel
-    const { launches, rockets, launchpads, payloads } = await fetchAllData();
-
-    // shape raw data into clean objects
-    const shaped = shapeLaunchData(launches, rockets, launchpads, payloads);
-
-    // sort newest first by default
-    shaped.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    state.allLaunches      = shaped;
-    state.filteredLaunches = shaped;
-
-    // clear skeleton loaders
-    clearSkeletons();
-
-    // render everything
-    renderStats(shaped);
-    renderAgencies(shaped);
-    renderTimeline(shaped);
-    renderFavorites(shaped);
-    initOrbitalVisualiser(shaped);
-
-    // populate agency filter dropdown
-    populateAgencyFilter(shaped);
-
-    // render first page of cards
-    renderPage(1);
-
-    // init search/filter/sort listeners
-    initFilters(state, renderPage);
-
-    // Start the new interactive hero and video scroll sync
-    initInteractiveText();
-    initScrollHero();
-    // Scroll spy still useful for highlighting
-    initScrollSpy();
-    initIntersectionObserver();
-    setStatusLive();
-  } catch (err) {
-    console.error("Failed to load data:", err);
-    setStatusError();
-    clearSkeletons();
-    showErrorState();
-  }
-}
-
-
-function initInteractiveText() {
-  const container = document.getElementById('reveal-text');
-  if (!container) return;
-  const text = "ORION ARC";
-  const letterDelay = 80;
-  const overlayDelay = 60;
-  const springDuration = 400;
-  
-  const images = [
-    "assets/Satellites/AdobeStock_594956182.jpg.optimal.jpg",
-    "assets/Satellites/Earth-from-space-1-64e9a7c.jpg",
-    "assets/Satellites/Galileo and blue background.jpg",
-    "assets/Satellites/MIT-Global-Broadband-01-PRESS.jpg",
-    "assets/Satellites/Webp.net-resizeimage-51-1200x800.jpg",
-    "assets/Satellites/different-types-of-satellites-jpg.webp",
-    "assets/Satellites/gw-nasa-earth-science-mission-satellite.jpg",
-    "assets/Satellites/satellites_960____640.jpg",
-    "assets/Satellites/universal_upscale_0_89dec73f-75e4-44ff-84d4-765c2e8f21f3_0.jpg",
-  ];
-
-  let html = '';
-  let letterIndex = 0;
-  for (let i = 0; i < text.length; i++) {
-    if (text[i] === ' ') {
-      html += '<span style="display:inline-block; width:0.3em;">&nbsp;</span>';
-      continue;
-    }
-    const bgUrl = images[letterIndex % images.length];
-    html += `
-      <span class="letter-wrap" data-index="${letterIndex}">
-        <span class="letter-base">${text[i]}</span>
-        <span class="letter-hover" style="background-image: url('${bgUrl}')">${text[i]}</span>
-        <span class="letter-overlay">${text[i]}</span>
-      </span>
-    `;
-    letterIndex++;
-  }
-  container.innerHTML = html;
-
-  const letters = document.querySelectorAll('.letter-wrap');
-  letters.forEach((el) => {
-    const idx = parseInt(el.dataset.index, 10);
-    setTimeout(() => {
-      el.classList.add('spring-in');
-    }, idx * letterDelay);
-  });
-
-  const totalDelay = (letterIndex * letterDelay) + springDuration;
-  
-  setTimeout(() => {
-    const overlays = document.querySelectorAll('.letter-overlay');
-    overlays.forEach((el, index) => {
-      setTimeout(() => {
-        el.classList.add('sweep');
-      }, index * overlayDelay);
-    });
-  }, totalDelay);
-}
-
-function initScrollHero() {
-  const video = document.getElementById('hero-video');
-  const section = document.getElementById('hero-scroll');
-  if (!video || !section) return;
-
-  // Make sure video stays paused so we can control timeline
-  video.pause();
-
-  const textContainer = document.querySelector('.reveal-text-container');
-  const heroHint     = document.querySelector('.hero-scroll-hint');
-
-  window.addEventListener('scroll', () => {
-    if (isNaN(video.duration) || video.duration === 0) return;
-    
-    const rect = section.getBoundingClientRect();
-    const scrollY = window.scrollY || window.pageYOffset;
-    const startOffset = section.offsetTop;
-    const maxScroll = section.offsetHeight - window.innerHeight;
-    
-    if (maxScroll <= 0) return;
-    
-    let progress = (scrollY - startOffset) / maxScroll;
-    progress = Math.max(0, Math.min(1, progress));
-    
-    requestAnimationFrame(() => {
-      // Sync video
-      video.currentTime = progress * video.duration;
-
-      // Transform Text (zoom + fade)
-      if (textContainer) {
-        // Keep text sharp until 25% scrolled, then begin fade and blur
-        const delayedProgress = Math.max(0, progress - 0.25);
-        
-        const scale   = 1 + (progress * 0.45); // smooth zoom starts immediately
-        const opacity = 1 - (delayedProgress * 1.5);   
-        const blur    = delayedProgress * 18;          
-        
-        textContainer.style.transform = `scale(${scale})`;
-        textContainer.style.opacity   = Math.max(0, opacity);
-        textContainer.style.filter    = `blur(${blur}px)`;
-      }
-
-      // Parallax for hint
-      if (heroHint) {
-        heroHint.style.transform = `translate(-50%, ${progress * -80}px)`;
-      }
-    });
-  });
-}
-
-
-function renderPage(page) {
-  state.currentPage = page;
-
-  const start = (page - 1) * state.perPage;
-  const end   = start + state.perPage;
-  const slice = state.filteredLaunches.slice(start, end);
-
-  renderLaunchCards(slice);
-  renderPagination(page, Math.ceil(state.filteredLaunches.length / state.perPage));
-
-  // stagger card entrance
-  staggerCards();
-
-  if (page > 1 || state.currentPage > 1) {
-    const section = document.getElementById("launches");
-    if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-}
-
-function staggerCards() {
-  const cards = document.querySelectorAll(".launch-card:not(.skeleton-card)");
-  cards.forEach((card, i) => {
-    setTimeout(() => card.classList.add("visible"), i * 50);
-  });
-}
-
-// same for agency cards
-function staggerAgencyCards() {
-  const cards = document.querySelectorAll(".agency-card");
-  cards.forEach((card, i) => {
-    setTimeout(() => card.classList.add("visible"), i * 60);
-  });
-}
-
-
-function populateAgencyFilter(launches) {
-  const select   = $("filter-agency");
-  const rockets  = [...new Set(launches.map(l => l.rocketName))].sort();
-
-  rockets.forEach(name => {
-    const opt = document.createElement("option");
-    opt.value = name;
-    opt.textContent = name;
-    select.appendChild(opt);
-  });
-}
-
-
-function openMission(id) {
-  const launch = state.allLaunches.find(l => l.id === id);
-  if (!launch) return;
-  state.selectedLaunch = launch;
-  renderModal(launch);
-}
-
-
-function showErrorState() {
-  const grid = $("launches-grid");
-  if (!grid) return;
-  grid.innerHTML = `
-    <div style="grid-column: 1/-1; text-align: center; padding: 60px 0;">
-      <p style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--danger);">
-        FAILED TO LOAD DATA — CHECK CONNECTION
-      </p>
-    </div>
-  `;
-}
-
-
-function startClock() {
-  const clock = $("nav-clock");
-  if (!clock) return;
-  clock.textContent = getISTString();
-  setInterval(() => {
-    clock.textContent = getISTString();
-  }, 1000);
-}
-
-
-function initTheme() {
-  const saved = localStorage.getItem("orion-theme") || "dark";
-  document.body.setAttribute("data-theme", saved);
-
-  $("theme-toggle").addEventListener("click", () => {
-    const current = document.body.getAttribute("data-theme");
-    const next    = current === "dark" ? "light" : "dark";
-    document.body.setAttribute("data-theme", next);
-    localStorage.setItem("orion-theme", next);
-
-    // spin animation
-    $("theme-toggle").classList.add("spinning");
-    setTimeout(() => $("theme-toggle").classList.remove("spinning"), 400);
-  });
-}
-
-
-function initHamburger() {
-  const btn    = $("nav-hamburger");
-  const drawer = $("nav-drawer");
-  if (!btn || !drawer) return;
-
-  btn.addEventListener("click", () => {
-    drawer.classList.toggle("open");
-  });
-
-  // close drawer on link click
-  drawer.querySelectorAll(".drawer-link").forEach(link => {
-    link.addEventListener("click", () => drawer.classList.remove("open"));
-  });
-}
-
-// highlights the correct nav link based on scroll position
-
-function initScrollSpy() {
-  const sections = ["globe", "launches", "agencies", "favorites"];
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        $$(".nav-link").forEach(l => l.classList.remove("active"));
-        const active = document.querySelector(`.nav-link[data-section="${entry.target.id}"]`);
-        if (active) active.classList.add("active");
-      }
-    });
-  }, { threshold: 0.3 });
-
-  sections.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) observer.observe(el);
-  });
-}
-
-// triggers .visible on elements as they scroll into view
-
-function initIntersectionObserver() {
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
-        observer.unobserve(entry.target); // only trigger once
-      }
-    });
-  }, { threshold: 0.1 });
-
-  document.querySelectorAll(".section-title").forEach(el => observer.observe(el));
-  document.querySelectorAll(".agency-card").forEach(el => observer.observe(el));
-
-  // Setup Typewriter experience
-  const floatTextEl = document.getElementById("timeline-float-text");
-  const words = ["Launches per year...", "Across all agencies.", "Pioneering the future."];
-  let wordIndex = 0;
-  let charIndex = 0;
-  let isDeleting = false;
-  let typewriterStarted = false;
-
-  function type() {
-    if (!typewriterStarted) return;
-    
-    const currentWord = words[wordIndex];
-    const speed = isDeleting ? 40 : 80;
-    
-    if (!isDeleting && charIndex < currentWord.length) {
-      charIndex++;
-      floatTextEl.innerHTML = `${currentWord.substring(0, charIndex)}<span class="typewriter-cursor">|</span>`;
-    } else if (isDeleting && charIndex > 0) {
-      charIndex--;
-      floatTextEl.innerHTML = `${currentWord.substring(0, charIndex)}<span class="typewriter-cursor">|</span>`;
-    } else if (!isDeleting && charIndex === currentWord.length) {
-      // Pause at end of word
-      setTimeout(() => isDeleting = true, 2000);
-    } else {
-      isDeleting = false;
-      wordIndex = (wordIndex + 1) % words.length;
-    }
-    
-    const nextCallDelay = isDeleting ? (charIndex === 0 ? 1000 : 40) : (charIndex === currentWord.length ? 2000 : 80);
-    setTimeout(type, nextCallDelay);
-  }
-
-  // Timeline chart observer (animate 3D neon bars and synchronized numbers)
-  const timelineObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        
-        // Start Typewriter
-        if (floatTextEl) {
-          typewriterStarted = true;
-          type();
-        }
-
-        const wrapEls = document.querySelectorAll(".neon-bar-wrap");
-        if (wrapEls.length === 0) return;
-
-        let startTime = null;
-        const duration = 2500; // Exact length of animation for all bars
-
-        function animateChart(timestamp) {
-          if (!startTime) startTime = timestamp;
-          const elapsed = timestamp - startTime;
-          const progress = Math.min(elapsed / duration, 1);
-          // Smooth easing out
-          const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-
-          wrapEls.forEach(wrap => {
-            const bar = wrap.querySelector(".neon-bar-3d");
-            const valEl = wrap.querySelector(".neon-bar-val");
-            
-            const targetH = parseFloat(bar.dataset.targetHeightPercent);
-            const targetCount = parseInt(bar.dataset.targetCount, 10);
-            
-            // Set dynamic height
-            bar.style.height = `${targetH * easeOutQuart}%`;
-            
-            // Animate number identically with height
-            valEl.textContent = Math.floor(targetCount * easeOutQuart);
-            valEl.style.opacity = Math.min(progress * 2, 1); // Fast fade in
-          });
-
-          if (progress < 1) {
-            requestAnimationFrame(animateChart);
-          }
-        }
-        
-        requestAnimationFrame(animateChart);
-        timelineObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.4 }); // Trigger when timeline section is 40% visible
-
-  const tlSection = document.getElementById("timeline");
-  if (tlSection) timelineObserver.observe(tlSection);
-}
-
-
-function initEventListeners() {
-
-  // pagination
-  $("page-prev")?.addEventListener("click", () => {
-    if (state.currentPage > 1) renderPage(state.currentPage - 1);
-  });
-
-  $("page-next")?.addEventListener("click", () => {
-    const total = Math.ceil(state.filteredLaunches.length / state.perPage);
-    if (state.currentPage < total) renderPage(state.currentPage + 1);
-  });
-
-  // page number click — delegated
-  $("page-numbers")?.addEventListener("click", e => {
-    if (e.target.classList.contains("page-num")) {
-      renderPage(Number(e.target.dataset.page));
-    }
-  });
-
-  // launch card clicks — delegated on grid
-  $("launches-grid")?.addEventListener("click", e => {
-    const viewBtn = e.target.closest(".card-view-btn");
-    const favBtn  = e.target.closest(".card-fav-btn");
-    const card    = e.target.closest(".launch-card");
-
-    if (viewBtn) {
-      openMission(viewBtn.dataset.id);
-    } else if (favBtn) {
-      const isSaved = toggleFavorite(favBtn.dataset.id);
-      updateFavButtons(favBtn.dataset.id, isSaved);
-      renderFavorites(state.allLaunches);
-    } else if (card && card.dataset.id) {
-      openMission(card.dataset.id);
-    }
-  });
-
-  // favorites grid clicks — same pattern
-  $("favorites-grid")?.addEventListener("click", e => {
-    const viewBtn = e.target.closest(".card-view-btn");
-    const favBtn  = e.target.closest(".card-fav-btn");
-    const card    = e.target.closest(".launch-card");
-
-    if (viewBtn) {
-      openMission(viewBtn.dataset.id);
-    } else if (favBtn) {
-      const isSaved = toggleFavorite(favBtn.dataset.id);
-      updateFavButtons(favBtn.dataset.id, isSaved);
-      renderFavorites(state.allLaunches);
-    } else if (card && card.dataset.id) {
-      openMission(card.dataset.id);
-    }
-  });
-
-  // modal close
-  $("modal-close")?.addEventListener("click", closeModal);
-  $("modal-overlay")?.addEventListener("click", e => {
-    if (e.target === $("modal-overlay")) closeModal();
-  });
-
-  // modal fav button
-  $("modal-fav-btn")?.addEventListener("click", e => {
-    const id      = e.target.dataset.id;
-    const isSaved = toggleFavorite(id);
-    e.target.textContent = isSaved ? "♥ SAVED" : "♡ SAVE MISSION";
-    updateFavButtons(id, isSaved);
-    renderFavorites(state.allLaunches);
-  });
-
-  // hero random mission button
-  $("hero-random-btn")?.addEventListener("click", () => {
-    const random = state.allLaunches[Math.floor(Math.random() * state.allLaunches.length)];
-    if (random) openMission(random.id);
-  });
-
-  // hero view mission button
-  $("hero-view-btn")?.addEventListener("click", () => {
-    if (state.selectedLaunch) openMission(state.selectedLaunch.id);
-    else if (state.allLaunches.length) openMission(state.allLaunches.find(l => l.upcoming)?.id);
-  });
-
-  // reset filters from empty state
-  $("empty-reset")?.addEventListener("click", () => {
-    // reset will be handled by filters.js resetFilters export
-    $("search-input").value   = "";
-    $("filter-agency").value  = "all";
-    $("filter-status").value  = "all";
-    $("filter-orbit").value   = "all";
-    $("sort-select").value    = "date-desc";
-    state.filteredLaunches    = state.allLaunches;
-    $("active-filters").innerHTML = "";
-    renderPage(1);
-  });
-
-  // close modal on escape key
-  document.addEventListener("keydown", e => {
-    if (e.key === "Escape") closeModal();
-  });
-}
-
-
-function initOrbitalVisualiser(launches) {
-  const canvas  = document.getElementById('orbital-canvas');
-  if (!canvas) return;
-  const ctx     = canvas.getContext('2d');
-
-  const ORBIT_BANDS = {
-    LEO:   { label: 'LEO',   r: 0.34, color: '#4fc3f7' },
-    ISS:   { label: 'ISS',   r: 0.38, color: '#81c784' },
-    SSO:   { label: 'SSO',   r: 0.41, color: '#ffb74d' },
-    Polar: { label: 'POLAR', r: 0.44, color: '#ef9a9a' },
-    GEO:   { label: 'GEO',   r: 0.60, color: '#ce93d8' },
-  };
-  const DEFAULT_BAND = { label: 'OTHER', r: 0.44, color: '#ef9a9a' };
-
-  // Filter to launches that have a known launchpad
-  const usable = launches.filter(l => l.siteLat !== null && l.siteLng !== null);
-  if (!usable.length) return;
-
-  let currentIdx  = 0;
-  let autoplay    = true;
-  let autoTimer   = null;
-  let arc         = null;       // active arc animation state
-  let particles   = [];         // orbiting particles
-
-  function resize() {
-    const wrap = canvas.parentElement;
-    const size = Math.min(wrap.clientWidth, wrap.clientHeight);
-    canvas.width  = size;
-    canvas.height = size;
-  }
-  resize();
-  window.addEventListener('resize', () => { resize(); draw(); });
-
-  function cx() { return canvas.width  / 2; }
-  function cy() { return canvas.height / 2; }
-  function R()  { return canvas.width  * 0.22; } // Earth radius
-
-  // map lat/lng to canvas x,y on Earth circle edge
-  function latLngToCanvas(lat, lng) {
-    const angle = (lng - 90) * (Math.PI / 180); // 0° points up
-    const r = R();
-    return {
-      x: cx() + r * Math.cos(angle),
-      y: cy() + r * Math.sin(angle),
-    };
-  }
-
-  function getOrbitBand(orbit) {
-    if (!orbit || orbit === '—') return DEFAULT_BAND;
-    const k = Object.keys(ORBIT_BANDS).find(k => orbit.toUpperCase().includes(k));
-    return k ? ORBIT_BANDS[k] : DEFAULT_BAND;
-  }
-
-  function startArc(launch) {
-    const band = getOrbitBand(launch.orbit);
-    const orbitR = canvas.width * band.r;
-    const site   = latLngToCanvas(launch.siteLat, launch.siteLng);
-
-    const hash    = launch.flightNumber % 360;
-    const endAngle = (hash / 360) * Math.PI * 2;
-    const endX     = cx() + orbitR * Math.cos(endAngle);
-    const endY     = cy() + orbitR * Math.sin(endAngle);
-
-    const midX = (site.x + endX) / 2;
-    const midY = (site.y + endY) / 2;
-    const pushX = (midX - cx()) * 0.6;
-    const pushY = (midY - cy()) * 0.6;
-    const cpX   = cx() + pushX * 2.2 + (Math.random() - 0.5) * orbitR * 0.5;
-    const cpY   = cy() + pushY * 2.2 + (Math.random() - 0.5) * orbitR * 0.5;
-
-    arc = {
-      sx: site.x, sy: site.y,
-      cpx: cpX,   cpy: cpY,
-      ex: endX,   ey: endY,
-      color: band.color,
-      t: 0,          // progress 0→1
-      fadingOut: false,
-      alpha: 0,
-      trail: [],     // sampled path points for the glowing trail
-    };
-
-    // pre-compute trail points (100 steps)
-    for (let i = 0; i <= 100; i++) {
-      const tt = i / 100;
-      arc.trail.push(quadBezier(tt, arc.sx, arc.cpx, arc.ex, arc.sy, arc.cpy, arc.ey));
-    }
-
-    // launch a new particle onto the orbit ring
-    spawnParticle(endAngle, orbitR, band.color);
-  }
-
-  function quadBezier(t, x0, x1, x2, y0, y1, y2) {
-    const x = (1-t)*(1-t)*x0 + 2*(1-t)*t*x1 + t*t*x2;
-    const y = (1-t)*(1-t)*y0 + 2*(1-t)*t*y1 + t*t*y2;
-    return { x, y };
-  }
-
-  function spawnParticle(startAngle, radius, color) {
-    particles.push({
-      angle:  startAngle,
-      radius: radius,
-      color:  color,
-      speed:  0.004 + Math.random() * 0.003,
-      size:   2.5 + Math.random() * 1.5,
-      alpha:  1,
-      life:   1,  // 0→1, counts down
-    });
-    // cap particles to avoid clutter
-    if (particles.length > 18) particles.shift();
-  }
-
-  function updatePanel(launch, idx) {
-    const $n = document.getElementById('orbital-mission-name');
-    const $r = document.getElementById('orbital-rocket');
-    const $s = document.getElementById('orbital-site');
-    const $o = document.getElementById('orbital-orbit');
-    const $d = document.getElementById('orbital-date');
-    const $t = document.getElementById('orbital-status');
-    const $i = document.getElementById('orbital-idx');
-    const $total = document.getElementById('orbital-total');
-
-    if ($n) { $n.style.opacity = '0'; setTimeout(() => { $n.textContent = launch.name; $n.style.opacity = '1'; }, 200); }
-    if ($r) $r.textContent = launch.rocketName || '—';
-    if ($s) $s.textContent = launch.siteName   || '—';
-    if ($o) $o.textContent = launch.orbit       || '—';
-    if ($d) $d.textContent = formatDate(launch.date);
-    if ($t) $t.textContent = getLaunchStatus(launch).toUpperCase();
-    if ($i) $i.textContent = idx + 1;
-    if ($total) $total.textContent = usable.length;
-  }
-
-  function showMission(idx) {
-    const launch = usable[idx];
-    updatePanel(launch, idx);
-    startArc(launch);
-  }
-
-  function scheduleNext() {
-    clearTimeout(autoTimer);
-    if (!autoplay) return;
-    autoTimer = setTimeout(() => {
-      currentIdx = (currentIdx + 1) % usable.length;
-      showMission(currentIdx);
-      scheduleNext();
-    }, 4500);
-  }
-
-  function drawEarth() {
-    const r   = R();
-    const isDark = document.body.getAttribute('data-theme') === 'dark';
-    const bgFill = isDark ? '#0d1a2e' : '#d8eaf7';
-    const glowColor = isDark ? 'rgba(79,195,247,0.18)' : 'rgba(0,120,200,0.12)';
-
-    // atmospheric glow ring
-    const glow = ctx.createRadialGradient(cx(), cy(), r * 0.9, cx(), cy(), r * 1.22);
-    glow.addColorStop(0, glowColor);
-    glow.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.beginPath();
-    ctx.arc(cx(), cy(), r * 1.22, 0, Math.PI * 2);
-    ctx.fillStyle = glow;
-    ctx.fill();
-
-    // Earth body
-    const grad = ctx.createRadialGradient(cx() - r * 0.25, cy() - r * 0.25, r * 0.1, cx(), cy(), r);
-    if (isDark) {
-      grad.addColorStop(0, '#1a3a5c');
-      grad.addColorStop(0.5, '#0f2744');
-      grad.addColorStop(1, '#081522');
-    } else {
-      grad.addColorStop(0, '#5bb3e8');
-      grad.addColorStop(0.5, '#3a8fc9');
-      grad.addColorStop(1, '#1b6aa5');
-    }
-    ctx.beginPath();
-    ctx.arc(cx(), cy(), r, 0, Math.PI * 2);
-    ctx.fillStyle = grad;
-    ctx.fill();
-
-    // land mass suggestion — simple dark blobs
-    const landColor = isDark ? 'rgba(30,70,100,0.6)' : 'rgba(20,90,40,0.35)';
-    const landMasses = [
-      { a: -0.2, b: 0.7, rx: r*0.28, ry: r*0.20 }, // Americas
-      { a: 1.0,  b: -0.1, rx: r*0.22, ry: r*0.30 }, // EuroAfrica
-      { a: 1.8,  b: -0.05, rx: r*0.18, ry: r*0.20 }, // Asia
-    ];
-    landMasses.forEach(lm => {
-      const px = cx() + lm.a * r * 0.55;
-      const py = cy() + lm.b * r * 0.55;
-      ctx.beginPath();
-      ctx.ellipse(px, py, lm.rx, lm.ry, 0, 0, Math.PI * 2);
-      ctx.fillStyle = landColor;
-      ctx.fill();
-    });
-
-    // edge glow
-    ctx.beginPath();
-    ctx.arc(cx(), cy(), r, 0, Math.PI * 2);
-    ctx.strokeStyle = isDark ? 'rgba(79,195,247,0.35)' : 'rgba(0,120,200,0.4)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
-
-  function drawOrbitRings() {
-    const isDark = document.body.getAttribute('data-theme') === 'dark';
-    Object.values(ORBIT_BANDS).forEach(band => {
-      const r = canvas.width * band.r;
-      ctx.beginPath();
-      ctx.arc(cx(), cy(), r, 0, Math.PI * 2);
-      ctx.strokeStyle = band.color +  (isDark ? '28' : '30');
-      ctx.lineWidth = 1;
-      ctx.setLineDash([4, 8]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // tiny label
-      ctx.fillStyle = band.color + (isDark ? 'a0' : '90');
-      ctx.font = `${canvas.width * 0.018}px 'JetBrains Mono', monospace`;
-      ctx.textAlign = 'left';
-      ctx.fillText(band.label, cx() + r + 4, cy() - 4);
-    });
-  }
-
-  function drawLaunchSites() {
-    const seenSites = new Set();
-    usable.forEach((l, i) => {
-      const key = `${l.siteLat},${l.siteLng}`;
-      if (seenSites.has(key)) return;
-      seenSites.add(key);
-
-      const { x, y } = latLngToCanvas(l.siteLat, l.siteLng);
-      const isActive = i === currentIdx;
-      const isDark = document.body.getAttribute('data-theme') === 'dark';
-
-      if (isActive) {
-        // pulsing ring
-        const pulse = 0.5 + 0.5 * Math.sin(Date.now() * 0.005);
-        ctx.beginPath();
-        ctx.arc(x, y, 6 + pulse * 4, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(79,195,247,${0.4 * pulse})`;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        // active dot
-        ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = '#4fc3f7';
-        ctx.fill();
-      } else {
-        ctx.beginPath();
-        ctx.arc(x, y, 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)';
-        ctx.fill();
-      }
-    });
-  }
-
-  function drawArc() {
-    if (!arc) return;
-
-    const speed = 0.012;
-    arc.t = Math.min(arc.t + speed, 1);
-    if (arc.t < 0.15) { arc.alpha = arc.t / 0.15; }
-    else if (arc.t > 0.85) { arc.alpha = (1 - arc.t) / 0.15; }
-    else { arc.alpha = 1; }
-
-    const trailEnd = Math.floor(arc.t * 100);
-    const trailStart = Math.max(0, trailEnd - 22);
-
-    // draw glowing trail segments with fade
-    for (let i = trailStart; i < trailEnd; i++) {
-      const p0 = arc.trail[i];
-      const p1 = arc.trail[i + 1];
-      if (!p0 || !p1) continue;
-      const segProgress = (i - trailStart) / (trailEnd - trailStart);
-      const alpha = segProgress * arc.alpha;
-
-      ctx.beginPath();
-      ctx.moveTo(p0.x, p0.y);
-      ctx.lineTo(p1.x, p1.y);
-      ctx.strokeStyle = arc.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
-      ctx.lineWidth = 2 + segProgress * 1.5;
-      ctx.lineCap = 'round';
-      ctx.stroke();
-    }
-
-    // dot at head of arc
-    const head = arc.trail[trailEnd];
-    if (head) {
-      ctx.beginPath();
-      ctx.arc(head.x, head.y, 4, 0, Math.PI * 2);
-      ctx.fillStyle = arc.color;
-      ctx.globalAlpha = arc.alpha;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-  }
-
-  function drawParticles() {
-    particles.forEach((p, idx) => {
-      p.angle += p.speed;
-      p.life  -= 0.0008;
-      if (p.life <= 0) { particles.splice(idx, 1); return; }
-
-      const px = cx() + p.radius * Math.cos(p.angle);
-      const py = cy() + p.radius * Math.sin(p.angle);
-
-      ctx.beginPath();
-      ctx.arc(px, py, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = p.color;
-      ctx.globalAlpha = Math.min(1, p.life * 3) * 0.75;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    });
-  }
-
-  function draw() {
-    if (!canvas.width) return;
-    const isDark = document.body.getAttribute('data-theme') === 'dark';
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // background
-    ctx.fillStyle = isDark ? '#080b0f' : '#f0f4f8';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // subtle grid dots (radar feel)
-    const gridStep = canvas.width / 10;
-    for (let gx = 0; gx < canvas.width; gx += gridStep) {
-      for (let gy = 0; gy < canvas.height; gy += gridStep) {
-        ctx.beginPath();
-        ctx.arc(gx, gy, 1, 0, Math.PI * 2);
-        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)';
-        ctx.fill();
-      }
-    }
-
-    drawOrbitRings();
-    drawEarth();
-    drawLaunchSites();
-    drawArc();
-    drawParticles();
-
-    requestAnimationFrame(draw);
-  }
-
-  document.getElementById('orbital-prev')?.addEventListener('click', () => {
-    currentIdx = (currentIdx - 1 + usable.length) % usable.length;
-    showMission(currentIdx);
-    if (autoplay) scheduleNext();
-  });
-
-  document.getElementById('orbital-next')?.addEventListener('click', () => {
-    currentIdx = (currentIdx + 1) % usable.length;
-    showMission(currentIdx);
-    if (autoplay) scheduleNext();
-  });
-
-  document.getElementById('orbital-auto')?.addEventListener('click', e => {
-    autoplay = !autoplay;
-    e.target.textContent = autoplay ? '⏸ PAUSE' : '▶ PLAY';
-    if (autoplay) scheduleNext();
-    else clearTimeout(autoTimer);
-  });
-
-  showMission(0);
-  scheduleNext();
-  draw();
-}
-
-
+function setStatusLive() { if($("status-dot")) $("status-dot").classList.add("live"); if($("status-label")) $("status-label").textContent = "LIVE DATA"; }
+function setStatusError() { if($("status-dot")) $("status-dot").classList.add("error"); if($("status-label")) $("status-label").textContent = "API ERROR"; }
 
 document.addEventListener("DOMContentLoaded", () => {
-  if ('scrollRestoration' in history) {
-    history.scrollRestoration = 'manual';
-  }
-  window.scrollTo(0, 0);
-  
-  if (window.location.hash) {
-    history.replaceState('', document.title, window.location.pathname + window.location.search);
-  }
-
-  initTheme();
-  initHamburger();
-  startClock();
-  initEventListeners();
-  init();
+    init();
+    $("launches-grid").onclick = $("favorites-grid").onclick = e => {
+        const id = e.target.closest("[data-id]")?.dataset.id;
+        if (e.target.closest(".card-fav-btn")) { toggleFavorite(id); updateFavButtons(id, getSavedIds().includes(id)); renderFavs(); }
+        else if (id) renderModal(state.allLaunches.find(l => l.id === id));
+    };
+    $("modal-close").onclick = $("modal-overlay").onclick = (e) => { if(e.target === $("modal-overlay") || e.target === $("modal-close")) hide($("modal-overlay")); };
+    $("theme-toggle").onclick = () => {
+        const next = document.body.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        document.body.setAttribute("data-theme", next); localStorage.setItem("orion-theme", next);
+    };
 });
+
+function initOrbitalVisualiser(launches) {
+    const canvas = $("orbital-canvas"), ctx = canvas.getContext('2d');
+    if (!canvas) return;
+    let idx = 0, auto = true, timer = null;
+    const missions = launches.filter(l => l.orbit !== "—").slice(0, 50);
+
+    function resize() {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = canvas.clientWidth * dpr; canvas.height = canvas.clientHeight * dpr;
+        ctx.scale(dpr, dpr); ctx.lineWidth = 1;
+    }
+    window.addEventListener('resize', resize); resize();
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const cx = canvas.clientWidth / 2, cy = canvas.clientHeight / 2;
+        const maxR = Math.min(cx, cy) * 0.85;
+
+        // Bands
+        const bands = [
+            { r: 0.15, c: "rgba(79, 195, 247, 0.15)", name: "LEO" },
+            { r: 0.35, c: "rgba(129, 199, 132, 0.12)", name: "ISS" },
+            { r: 0.60, c: "rgba(255, 183, 77, 0.1)", name: "SSO" },
+            { r: 0.85, c: "rgba(206, 147, 216, 0.08)", name: "GEO" }
+        ];
+
+        bands.forEach(b => {
+           ctx.strokeStyle = b.c; ctx.beginPath(); ctx.arc(cx, cy, maxR * b.r, 0, Math.PI*2); ctx.stroke();
+        });
+
+        // Earth
+        ctx.fillStyle = "#0d1a2e"; ctx.beginPath(); ctx.arc(cx, cy, maxR * 0.08, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = "rgba(79, 195, 247, 0.4)"; ctx.beginPath(); ctx.arc(cx, cy, maxR * 0.08, 0, Math.PI*2); ctx.stroke();
+
+        // Missions
+        missions.forEach((m, i) => {
+            const angle = (i * 0.4) + (performance.now() * 0.0001 * (i % 2 ? 1 : -1));
+            const band = bands.find(b => b.name === m.orbit) || bands[3];
+            const dist = maxR * band.r;
+            const x = cx + Math.cos(angle) * dist, y = cy + Math.sin(angle) * dist;
+
+            ctx.fillStyle = i === idx ? "#4fc3f7" : "rgba(255,255,255,0.2)";
+            ctx.beginPath(); ctx.arc(x, y, i === idx ? 4 : 2, 0, Math.PI*2); ctx.fill();
+            if(i === idx) {
+                ctx.strokeStyle = "#4fc3f7"; ctx.beginPath(); ctx.arc(x, y, 8 + Math.sin(performance.now()*0.01)*2, 0, Math.PI*2); ctx.stroke();
+            }
+        });
+
+        if(missions[idx]) updateOrbitalUI(missions[idx], idx + 1, missions.length);
+        requestAnimationFrame(draw);
+    }
+    
+    $("orbital-next").onclick = () => { auto = false; idx = (idx + 1) % missions.length; };
+    $("orbital-prev").onclick = () => { auto = false; idx = (idx - 1 + missions.length) % missions.length; };
+    $("orbital-auto").onclick = () => { auto = !auto; $("orbital-auto").textContent = auto ? "⏸ PAUSE" : "▶ PLAY"; };
+
+    setInterval(() => { if(auto) idx = (idx + 1) % missions.length; }, 4000);
+    draw();
+}
+
+function updateOrbitalUI(m, count, total) {
+    if(!m) return;
+    $("orbital-mission-name").textContent = m.name;
+    $("orbital-rocket").textContent = m.rocketName;
+    $("orbital-site").textContent = m.siteName;
+    $("orbital-orbit").textContent = m.orbit;
+    $("orbital-date").textContent = formatDate(m.date);
+    $("orbital-status").textContent = getLaunchStatus(m).toUpperCase();
+    $("orbital-status").className = `orbital-meta-val badge-${getLaunchStatus(m)}`;
+    $("orbital-idx").textContent = count;
+    $("orbital-total").textContent = total;
+}
+
+function populateAgencyFilter(launches) {
+  const select = $("filter-agency"); if(!select) return;
+  [...new Set(launches.map(l => l.rocketName))].sort().forEach(name => {
+    const opt = document.createElement("option"); opt.value = name; opt.textContent = name; select.appendChild(opt);
+  });
+}
+
+function initScrollSpy() {
+  const observer = new IntersectionObserver(entries => entries.forEach(e => {
+    if (e.isIntersecting) {
+        $$(".nav-link").forEach(l => l.classList.remove("active"));
+        const active = document.querySelector(`.nav-link[data-section="${e.target.id}"]`);
+        if (active) active.classList.add("active");
+    }
+  }), { threshold: 0.3 });
+  ["globe", "launches", "agencies", "favorites"].forEach(id => { if($(id)) observer.observe($(id)); });
+}
