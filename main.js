@@ -155,9 +155,9 @@ function createLaunchCard(launch) {
       <div class="card-header-row"><span class="card-flight">#${launch.flightNumber}</span><span class="badge badge-${status}">${status.toUpperCase()}</span></div>
       <h3 class="card-name">${launch.name}</h3>
       <div class="card-meta">
-        <span class="card-meta-item">🚀 ${launch.rocketName}</span>
-        <span class="card-meta-item">📍 ${launch.siteName}</span>
-        <span class="card-meta-item">📅 ${formatDate(launch.date)}</span>
+        <span class="card-meta-item"><img src="assets/Spaceship.png" class="meta-icon-img" /> ${launch.rocketName}</span>
+        <span class="card-meta-item"><img src="assets/location.png" class="meta-icon-img" /> ${launch.siteName}</span>
+        <span class="card-meta-item"><img src="assets/callender.png" class="meta-icon-img" /> ${formatDate(launch.date)}</span>
       </div>
     </div>
     <div class="card-footer">
@@ -187,8 +187,11 @@ function renderPagination(currentPage, totalPages) {
         const btn = document.createElement("button");
         btn.className = `page-num${i === currentPage ? " active" : ""}`;
         btn.textContent = i; btn.dataset.page = i;
+        btn.onclick = () => renderPage(i); // Added click handler
         container.appendChild(btn);
     }
+    $("page-prev").disabled = currentPage === 1;
+    $("page-next").disabled = currentPage === totalPages || totalPages === 0;
 }
 
 function renderAgencies(launches) {
@@ -257,7 +260,10 @@ function updateFavButtons(id, isSaved) {
 
 // ── INITIALIZATION ──
 async function init() {
-    // ── INITIALIZATION ──
+    // ── INTERACTIVE TEXT (Sweep Animation) ──
+    initInteractiveText();
+
+    // ── DATA FETCH ──
     try {
       console.log('Orion Arc: Initializing...');
       const data = await fetchAllData();
@@ -268,8 +274,9 @@ async function init() {
       $$(".skeleton-card").forEach(s => s.remove());
       renderStats(shaped); renderAgencies(shaped); renderTimeline(shaped); renderFavs();
       initOrbitalVisualiser(shaped); populateAgencyFilter(shaped); renderPage(1);
-      initFilters(state, renderPage); initInteractiveText(); initScrollHero();
+      initFilters(state, renderPage); initScrollHero();
       initScrollSpy(); initIntersectionObserver();
+      initTypewriterSubtitles();
       
       const globeContainer = $("globe-canvas-container");
       if (globeContainer) {
@@ -331,14 +338,10 @@ function renderPage(page) {
 
 // ── CUSTOM VISUALS ──
 function initInteractiveText() {
-    const container = $("reveal-text"); if (!container) return;
-    const text = "ORION ARC";
-    container.innerHTML = text.split('').map((char, i) => char === ' ' ? '<span style="display:inline-block; width:0.3em;">&nbsp;</span>' : `
-        <span class="letter-wrap" data-index="${i}">
-            <span class="letter-base">${char}</span>
-            <span class="letter-overlay">${char}</span>
-        </span>`).join('');
-    $$(".letter-wrap").forEach((l, i) => setTimeout(() => l.classList.add('spring-in'), i * 80));
+    // Trigger the silver sweep wave across already hardcoded HTML
+    $$(".letter-overlay").forEach((el, i) => {
+        setTimeout(() => el.classList.add("sweep"), i * 120);
+    });
 }
 
 function initScrollHero() {
@@ -347,13 +350,56 @@ function initScrollHero() {
         const progress = Math.max(0, Math.min(1, (window.scrollY - section.offsetTop) / (section.offsetHeight - window.innerHeight)));
         requestAnimationFrame(() => {
             if (video.duration) video.currentTime = progress * video.duration;
-            const text = document.querySelector('.reveal-text-container');
+            const text = $("reveal-text");
             if (text) {
-                text.style.transform = `scale(${1 + progress * 0.45})`;
-                text.style.opacity = 1 - Math.max(0, progress - 0.25) * 1.5;
+                // Fixed scaleY(1.4) baseline + uniform scale on top
+                text.style.transform = `translate3d(0,0,0) scaleY(1.4) scale(${1 + progress * 0.45})`;
+                text.style.opacity = 1 - Math.max(0, (progress - 0.15) * 2.0); // Smoother fade
+                text.style.filter = `blur(${Math.max(0, (progress - 0.05) * 12)}px)`; // Threshold blur
             }
         });
     });
+}
+function initTypewriterSubtitles() {
+    const el = $("timeline-float-text"); if (!el) return;
+    const text = el.textContent.trim();
+    const RANDOM_CHARS = "_!X$0-+*#";
+    const getRandomChar = () => RANDOM_CHARS[Math.floor(Math.random() * RANDOM_CHARS.length)];
+    
+    el.classList.add("special-text-active"); // For font-mono styling if needed
+    
+    new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) {
+            let phase = 1; let step = 0; const speed = 20;
+            const maxSteps = text.length * 2;
+
+            const interval = setInterval(() => {
+                let content = "";
+                if (phase === 1) {
+                    const currentLen = Math.min(step + 1, text.length);
+                    for (let i = 0; i < currentLen; i++) content += getRandomChar();
+                    for (let i = currentLen; i < text.length; i++) content += "&nbsp;";
+                    if (step >= maxSteps - 1) { phase = 2; step = 0; }
+                } else {
+                    const revealedCount = Math.floor(step / 2);
+                    for (let i = 0; i < revealedCount && i < text.length; i++) content += text[i];
+                    if (revealedCount < text.length) {
+                        content += (step % 2 === 0) ? "_" : getRandomChar();
+                    }
+                    // Fill remaining with noise
+                    let currentRawLen = revealedCount + (revealedCount < text.length ? 1 : 0);
+                    for (let i = currentRawLen; i < text.length; i++) content += getRandomChar();
+
+                    if (step >= maxSteps - 1) {
+                        el.textContent = text; clearInterval(interval); return;
+                    }
+                }
+                el.innerHTML = content;
+                step++;
+            }, speed);
+            entries[0].target.unobserve;
+        }
+    }, { threshold: 0.5 }).observe(el);
 }
 
 function initIntersectionObserver() {
@@ -480,6 +526,11 @@ document.addEventListener("DOMContentLoaded", () => {
     $("theme-toggle").onclick = () => {
         const next = document.body.getAttribute("data-theme") === "dark" ? "light" : "dark";
         document.body.setAttribute("data-theme", next); localStorage.setItem("orion-theme", next);
+    };
+    $("page-prev").onclick = () => { if (state.currentPage > 1) renderPage(state.currentPage - 1); };
+    $("page-next").onclick = () => { 
+        const total = Math.ceil(state.filteredLaunches.length / state.perPage);
+        if (state.currentPage < total) renderPage(state.currentPage + 1); 
     };
 });
 

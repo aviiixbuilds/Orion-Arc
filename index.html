@@ -61,8 +61,48 @@
       <p class="hero-scroll-hint">Most space apps treat launches as rows in a database.<br>Orion Arc treats them as events on a planet.</p>
       
       <div class="reveal-text-container">
-        <h1 class="reveal-text" id="reveal-text" aria-label="ORION ARC">
-          <!-- Spans populated by JS -->
+        <h1 class="reveal-text" id="reveal-text" aria-label="ORION ARC" style="transform: scaleY(1.4);">
+          <span class="letter-wrap spring-in" data-index="0">
+            <span class="letter-base">O</span>
+            <span class="letter-hover" style="background-image: url('assets/Satellites/AdobeStock_594956182.jpg.optimal.jpg');">O</span>
+            <span class="letter-overlay">O</span>
+          </span>
+          <span class="letter-wrap spring-in" data-index="1">
+            <span class="letter-base">R</span>
+            <span class="letter-hover" style="background-image: url('assets/Satellites/Debris_objects_-_mostly_debris_-_in_low_Earth_orbit_LEO_-_view_over_the_equator-1024x786.jpg');">R</span>
+            <span class="letter-overlay">R</span>
+          </span>
+          <span class="letter-wrap spring-in" data-index="2">
+            <span class="letter-base">I</span>
+            <span class="letter-hover" style="background-image: url('assets/Satellites/Earth-from-space-1-64e9a7c.jpg');">I</span>
+            <span class="letter-overlay">I</span>
+          </span>
+          <span class="letter-wrap spring-in" data-index="3">
+            <span class="letter-base">O</span>
+            <span class="letter-hover" style="background-image: url('assets/Satellites/Galileo and blue background.jpg');">O</span>
+            <span class="letter-overlay">O</span>
+          </span>
+          <span class="letter-wrap spring-in" data-index="4">
+            <span class="letter-base">N</span>
+            <span class="letter-hover" style="background-image: url('assets/Satellites/MIT-Global-Broadband-01-PRESS.jpg');">N</span>
+            <span class="letter-overlay">N</span>
+          </span>
+          <span style="display:inline-block; width:0.3em;">&nbsp;</span>
+          <span class="letter-wrap spring-in" data-index="5">
+            <span class="letter-base">A</span>
+            <span class="letter-hover" style="background-image: url('assets/Satellites/Webp.net-resizeimage-51-1200x800.jpg');">A</span>
+            <span class="letter-overlay">A</span>
+          </span>
+          <span class="letter-wrap spring-in" data-index="6">
+            <span class="letter-base">R</span>
+            <span class="letter-hover" style="background-image: url('assets/Satellites/different-types-of-satellites-jpg.webp');">R</span>
+            <span class="letter-overlay">R</span>
+          </span>
+          <span class="letter-wrap spring-in" data-index="7">
+            <span class="letter-base">C</span>
+            <span class="letter-hover" style="background-image: url('assets/Satellites/gw-nasa-earth-science-mission-satellite.jpg');">C</span>
+            <span class="letter-overlay">C</span>
+          </span>
         </h1>
       </div>
     </div>
@@ -267,16 +307,20 @@
     </section>
 
     <section class="timeline-section" id="timeline">
-      <div id="spline-bg-container" class="spline-bg-container"></div>
       <div class="section-header">
         <h2 class="section-title">
           <span class="title-accent">04</span> LAUNCH TIMELINE
         </h2>
+        <p class="section-subtitle">Planetary mission history timeline</p>
       </div>
-      <div class="timeline-floating-title" id="timeline-float-text">
-        Launches per year across all agencies
-      </div>
-      <div class="timeline-chart" id="timeline-chart">
+
+      <div class="timeline-visual-container">
+        <div id="spline-bg-container" class="spline-bg-container"></div>
+        <div class="timeline-floating-title" id="timeline-float-text">
+          Launches per year across all agencies
+        </div>
+        <div class="timeline-chart" id="timeline-chart">
+        </div>
       </div>
 
       <script type="module">
@@ -329,15 +373,15 @@
 
         <div class="modal-meta-grid">
           <div class="modal-meta-item">
-            <span class="meta-label">ROCKET</span>
+            <span class="meta-label"><img src="assets/Spaceship.png" class="meta-icon-img" /> ROCKET</span>
             <span class="meta-value" id="modal-rocket">—</span>
           </div>
           <div class="modal-meta-item">
-            <span class="meta-label">DATE</span>
+            <span class="meta-label"><img src="assets/callender.png" class="meta-icon-img" /> DATE</span>
             <span class="meta-value" id="modal-date">—</span>
           </div>
           <div class="modal-meta-item">
-            <span class="meta-label">LAUNCH SITE</span>
+            <span class="meta-label"><img src="assets/location.png" class="meta-icon-img" /> LAUNCH SITE</span>
             <span class="meta-value" id="modal-site">—</span>
           </div>
           <div class="modal-meta-item">

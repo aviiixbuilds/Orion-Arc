@@ -554,7 +554,6 @@ h1, h2, h3, h4 {
 
 .orbital-section {
   padding: var(--section-padding);
-  border-top: 1px solid var(--border);
 }
 
 .orbital-layout {
@@ -770,7 +769,6 @@ h1, h2, h3, h4 {
   flex-wrap: wrap;
   gap: 0;
   background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
   padding: 0;
 }
 
@@ -807,7 +805,6 @@ h1, h2, h3, h4 {
 }
 
 .footer {
-  border-top: 1px solid var(--border);
   padding: 24px;
   display: flex;
   align-items: center;
@@ -986,6 +983,9 @@ h1, h2, h3, h4 {
   font-size: 0.6rem;
   letter-spacing: 0.15em;
   color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .meta-value {
@@ -1045,12 +1045,8 @@ h1, h2, h3, h4 {
 
 .main-wrapper section {
   padding: 72px 0;
-  border-bottom: 1px solid var(--border);
 }
 
-.main-wrapper section:last-child {
-  border-bottom: none;
-}
 
 .globe-wrapper {
   display: grid;
@@ -1337,15 +1333,26 @@ h1, h2, h3, h4 {
 /* ── FULL PAGE TIMELINE SECTION ── */
 .timeline-section {
   position: relative;
-  min-height: 80vh; /* Reduced height to keep it horizontally focused */
+  min-height: auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 40px 24px 24px; /* More compact top padding */
-  overflow: hidden; /* Ensure background doesn't leak */
+  padding: 80px 24px;
+  overflow: visible;
   background: transparent !important;
 }
 
+.timeline-visual-container {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
 /* ── SPLINE BACKGROUND ── */
 .spline-bg-container {
@@ -1354,7 +1361,7 @@ h1, h2, h3, h4 {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: -1; 
+  z-index: 1; 
   pointer-events: none;
   background: transparent !important;
 }
@@ -1367,34 +1374,26 @@ h1, h2, h3, h4 {
   width: 100% !important;
   height: 200% !important;
   object-fit: cover;
-  opacity: 1; 
-  filter: brightness(0.7) contrast(1.1);
+  opacity: 0.8; 
+  filter: brightness(0.6) contrast(1.1);
 }
 
 .timeline-floating-title {
   position: absolute;
-  top: 45%; /* Places it vertically towards the middle, below header */
-  left: 8%; /* Locks it to the empty left space in front of the tall right bars */
+  top: 40%;
+  left: 8%;
   transform: translateY(-50%);
-  width: 40%; /* restricts width to force natural paragraph wrapping */
+  width: 70%; /* Increased width to prevent clipping at large font size */
   z-index: 10;
-  pointer-events: none; /* Allows user to still interact with UI underneath */
-}
-
-.timeline-floating-title {
-  position: absolute;
-  top: 40%; /* Places it vertically towards the middle, below header */
-  left: 8%; /* Locks it to the empty left space in front of the tall right bars */
-  transform: translateY(-50%);
-  width: 40%; /* restricts width to force natural paragraph wrapping */
-  z-index: 10;
-  pointer-events: none; /* Allows user to still interact with UI underneath */
+  pointer-events: none;
   font-family: var(--font-display);
   font-size: 3.5rem;
   font-weight: 800;
   line-height: 1.1;
   color: #fff;
   text-shadow: 0 0 30px rgba(0, 230, 118, 0.4), 0 0 15px rgba(79, 195, 247, 0.3);
+  white-space: pre-wrap; /* Preserve spaces during decoding */
+  min-height: 1.1em;
 }
 
 .typewriter-cursor {
@@ -1414,7 +1413,6 @@ h1, h2, h3, h4 {
 .globe-section {
   padding: 80px 24px;
   background: var(--bg-root);
-  border-bottom: 1px solid var(--border);
 }
 
 .globe-container {
@@ -1460,19 +1458,20 @@ h1, h2, h3, h4 {
 }
 .timeline-chart {
   width: 100%;
-  height: 70vh; /* 1.75x taller physical boundary for the graph */
+  height: 100%;
   background: transparent;
   border: none;
   padding: 0;
   overflow-x: auto;
-  overflow-y: visible; /* Allow massive bars to break bounds vertically */
+  overflow-y: visible;
   display: flex;
-  align-items: stretch; /* Correct height resolution for children */
-  justify-content: center; /* keep centered on screen */
-  gap: clamp(8px, 1.5vw, 24px); /* dynamic fluid gap */
+  align-items: flex-end; /* Ground bars to the bottom of the container */
+  justify-content: center;
+  gap: clamp(8px, 1.5vw, 24px);
   padding-bottom: 50px;
   padding-top: 60px;
   position: relative;
+  z-index: 5;
   scrollbar-width: none;
   perspective: 1200px;
 }
