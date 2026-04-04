@@ -129,16 +129,174 @@ function shapeLaunchData(launches, rockets, launchpads, payloads) {
 }
 
 // ── RENDER LOGIC ──
+// ── HIGH-VELOCITY MARQUEE ──
+let lastScrollY = window.scrollY;
+let scrollVelocity = 0;
+let smoothVelocity = 0;
+
+function initStatsMarquee() {
+  const row1Track = document.querySelector('#marquee-row-1 .stats-marquee-track');
+  const row2Track = document.querySelector('#marquee-row-2 .stats-marquee-track');
+  if (!row1Track || !row2Track) return;
+
+  let x1 = 0; let x2 = 0;
+  const baseVelocity1 = -1.0; // Moderate cinematic base
+  const baseVelocity2 = 1.0;
+  let isHovering = false;
+
+  const wrapper = document.querySelector('.stats-marquee-wrapper');
+  wrapper.addEventListener('mouseenter', () => isHovering = true);
+  wrapper.addEventListener('mouseleave', () => isHovering = false);
+
+  function animate() {
+    if (isHovering) {
+        requestAnimationFrame(animate);
+        return;
+    }
+
+    // Measurement check - essential if data loads late
+    const firstItem = row1Track.firstElementChild;
+    if (!firstItem || firstItem.offsetWidth < 10) {
+      requestAnimationFrame(animate);
+      return;
+    }
+
+    const currentScrollY = window.scrollY;
+    scrollVelocity = currentScrollY - lastScrollY;
+    lastScrollY = currentScrollY;
+
+    smoothVelocity += (scrollVelocity - smoothVelocity) * 0.15;
+    const velocityFactor = Math.abs(smoothVelocity) * 0.08;
+    const directionFactor = smoothVelocity >= 0 ? 1 : -1;
+
+    const move1 = baseVelocity1 - (directionFactor * velocityFactor);
+    const move2 = baseVelocity2 + (directionFactor * velocityFactor);
+
+    x1 += move1;
+    x2 += move2;
+
+    const itemWidth = firstItem.offsetWidth + 40; // item + gap
+    
+    // Smooth wrapping
+    if (x1 <= -itemWidth) x1 += itemWidth;
+    if (x1 >= 0) x1 -= itemWidth;
+    
+    if (x2 >= 0) x2 -= itemWidth;
+    if (x2 <= -itemWidth) x2 += itemWidth;
+
+    row1Track.style.transform = `translate3d(${x1}px, 0, 0)`;
+    row2Track.style.transform = `translate3d(${x2}px, 0, 0)`;
+
+    requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
+}
+
+// ── TYPEWRITER EFFECT ──
+class Typewriter {
+    constructor(element, words, options = {}) {
+        this.el = element;
+        this.words = words;
+        this.speed = options.speed || 100;
+        this.delayBetweenWords = options.delayBetweenWords || 2000;
+        this.cursorChar = options.cursorChar || '|';
+        this.cursor = options.cursor !== undefined ? options.cursor : true;
+        
+        this.displayText = "";
+        this.isDeleting = false;
+        this.wordIndex = 0;
+        this.charIndex = 0;
+        this.isPaused = false;
+        
+        this.init();
+    }
+
+    init() {
+        this.animate();
+    }
+
+    animate() {
+        if (this.isPaused) return;
+
+        const currentWord = this.words[this.wordIndex];
+        let delay = this.isDeleting ? this.speed / 2 : this.speed;
+
+        if (!this.isDeleting) {
+            if (this.charIndex < currentWord.length) {
+                this.displayText = currentWord.substring(0, this.charIndex + 1);
+                this.charIndex++;
+            } else {
+                this.isDeleting = true;
+                delay = this.delayBetweenWords;
+            }
+        } else {
+            if (this.charIndex > 0) {
+                this.displayText = currentWord.substring(0, this.charIndex - 1);
+                this.charIndex--;
+            } else {
+                this.isDeleting = false;
+                this.wordIndex = (this.wordIndex + 1) % this.words.length;
+            }
+        }
+
+        this.render();
+        setTimeout(() => this.animate(), delay);
+    }
+
+    render() {
+        // Use textContent for safety and to avoid potential parsing issues
+        if (this.el) {
+            this.el.innerHTML = '';
+            const textNode = document.createTextNode(this.displayText);
+            this.el.appendChild(textNode);
+            
+            if (this.cursor) {
+                const cursorSpan = document.createElement('span');
+                cursorSpan.className = 'typewriter-cursor';
+                cursorSpan.style.marginLeft = '2px';
+                cursorSpan.style.display = 'inline-block';
+                cursorSpan.style.animation = 'blink 0.8s step-end infinite';
+                cursorSpan.textContent = this.cursorChar;
+                this.el.appendChild(cursorSpan);
+            }
+        }
+    }
+}
+
+function initTimelineTypewriter() {
+    const el = document.getElementById('typewriter-target');
+    if (!el) {
+        // Retry if HTML wasn't ready (though DOMContentLoaded should cover it)
+        const parent = document.querySelector('.timeline-floating-title');
+        if (parent) {
+            parent.innerHTML = `<div>Launches per year</div><div id="typewriter-target"></div>`;
+            initTimelineTypewriter();
+        }
+        return;
+    }
+    
+    const words = ["across all agencies", "around the world", "into deep space", "since 1950"];
+    
+    new Typewriter(el, words, {
+        speed: 80,
+        delayBetweenWords: 2000,
+        cursorChar: "|" 
+    });
+}
+
 function renderStats(launches) {
   const total = launches.length, upcoming = launches.filter(l => l.upcoming).length;
   const rate = calcSuccessRate(launches), rockets = [...new Set(launches.map(l => l.rocketName))].length;
-  const agencies = [...new Set(launches.map(l => l.nationality).filter(Boolean))].length;
-  $("stat-total").textContent = total.toLocaleString();
-  $("stat-success").textContent = rate;
-  $("stat-upcoming").textContent = upcoming;
-  $("stat-agencies").textContent = agencies || "6+";
-  $("stat-rockets").textContent = rockets;
+  const agencies = [...new Set(launches.map(l => l.nationality).filter(Boolean))].length || '6+';
+  
+  const statsStr = `${total} TOTAL LAUNCHES        |        ${rate} SUCCESS RATE        |        ${upcoming} UPCOMING        |        ${agencies} AGENCIES        |        ${rockets} ROCKET TYPES        |        `;
+
+  document.querySelectorAll('.marquee-item').forEach(el => {
+    el.innerHTML = statsStr;
+  });
 }
+
 
 function createLaunchCard(launch) {
   const status = getLaunchStatus(launch);
@@ -276,7 +434,6 @@ async function init() {
       initOrbitalVisualiser(shaped); populateAgencyFilter(shaped); renderPage(1);
       initFilters(state, renderPage); initScrollHero();
       initScrollSpy(); initIntersectionObserver();
-      initTypewriterSubtitles();
       
       const globeContainer = $("globe-canvas-container");
       if (globeContainer) {
@@ -515,8 +672,11 @@ function initFilters(state, renderPage) {
 function setStatusLive() { if($("status-dot")) $("status-dot").classList.add("live"); if($("status-label")) $("status-label").textContent = "LIVE DATA"; }
 function setStatusError() { if($("status-dot")) $("status-dot").classList.add("error"); if($("status-label")) $("status-label").textContent = "API ERROR"; }
 
-document.addEventListener("DOMContentLoaded", () => {
-    init();
+document.addEventListener("DOMContentLoaded", async () => {
+    initStatsMarquee();
+    initTimelineTypewriter();
+    await init();
+
     $("launches-grid").onclick = $("favorites-grid").onclick = e => {
         const id = e.target.closest("[data-id]")?.dataset.id;
         if (e.target.closest(".card-fav-btn")) { toggleFavorite(id); updateFavButtons(id, getSavedIds().includes(id)); renderFavs(); }
