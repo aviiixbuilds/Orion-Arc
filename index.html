@@ -11,8 +11,29 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
 
-      <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=1712411500" />
+  <style>
+    .loading-sub { display: flex !important; align-items: center !important; gap: 12px !important; margin-top: 15px !important; font-size: 0.7rem !important; font-weight: 800 !important; color: #00e5ff !important; clear: both !important; }
+    .diag-particle-group { display: flex !important; gap: 8px !important; align-items: center !important; margin-left: 8px !important; }
+    .diag-particle { 
+      width: 6px !important; height: 6px !important;
+      background: #00e5ff !important; 
+      transform: rotate(45deg) !important;
+      opacity: 0.4 !important;
+      animation: diag-pulse 1s cubic-bezier(0.1,0,0,1) infinite !important;
+      border: none !important;
+      outline: none !important;
+    }
+    .diag-particle:nth-child(2) { animation-delay: 0.15s !important; }
+    .diag-particle:nth-child(3) { animation-delay: 0.3s !important; }
+    @keyframes diag-pulse {
+      0%, 100% { transform: rotate(45deg) scale(0.8); opacity: 0.3; filter: blur(1px); }
+      50% { transform: rotate(45deg) scale(1.3); opacity: 1; filter: blur(0px); box-shadow: 0 0 12px #00e5ff, 0 0 20px rgba(0,229,255,0.4); }
+    }
+  </style>
+
 </head>
+
 <body data-theme="dark">
 
     <nav class="navbar" id="navbar">
@@ -175,7 +196,8 @@
             <option value="all">ALL STATUS</option>
             <option value="success">SUCCESS</option>
             <option value="failed">FAILED</option>
-            <option value="upcoming">UPCOMING</option>
+            <option value="pending">PENDING</option>
+
           </select>
 
           <select class="filter-select" id="filter-orbit">
@@ -352,50 +374,98 @@
   </main>
 
     <div class="modal-overlay hidden" id="modal-overlay">
-    <div class="modal" id="mission-modal" role="dialog" aria-modal="true">
+    <div class="modal hud-modal" id="mission-modal" role="dialog" aria-modal="true">
+      
+      <!-- Top Status Bar -->
+      <div class="hud-top-bar">
+        <div class="hud-top-info">
+          <div class="info-pair"><span class="key">Mission:</span><span class="val" id="modal-mission-name">MISSION_UNK</span></div>
+          <div class="info-pair"><span class="key">Status:</span><span class="val" id="modal-badge">STABLE</span></div>
+          <div class="info-pair location-highlight"><span class="key">Launch Site:</span><span class="val" id="modal-site">FACILITY_A</span></div>
+        </div>
 
-      <div class="modal-header">
-        <div class="modal-badge" id="modal-badge">—</div>
-        <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+        <button class="hud-close" id="modal-close">✕</button>
       </div>
 
-      <div class="modal-body">
-        <h2 class="modal-mission-name" id="modal-mission-name">—</h2>
+      <div class="hud-main-layout">
+        
+        <!-- Row 1 Left: Loading / Visual -->
+        <div class="hud-panel panel-loading">
+          <div class="loading-val">84%</div>
+          <div class="loading-sub">
+            DATA LOADING
+            <div class="diag-particle-group">
+              <div class="diag-particle"></div>
+              <div class="diag-particle"></div>
+              <div class="diag-particle"></div>
+            </div>
+          </div>
 
-        <div class="modal-meta-grid">
-          <div class="modal-meta-item">
-            <span class="meta-label"><img src="assets/Spaceship.png" class="meta-icon-img" /> ROCKET</span>
-            <span class="meta-value" id="modal-rocket">—</span>
-          </div>
-          <div class="modal-meta-item">
-            <span class="meta-label"><img src="assets/callender.png" class="meta-icon-img" /> DATE</span>
-            <span class="meta-value" id="modal-date">—</span>
-          </div>
-          <div class="modal-meta-item">
-            <span class="meta-label"><img src="assets/location.png" class="meta-icon-img" /> LAUNCH SITE</span>
-            <span class="meta-value" id="modal-site">—</span>
-          </div>
-          <div class="modal-meta-item">
-            <span class="meta-label">ORBIT</span>
-            <span class="meta-value" id="modal-orbit">—</span>
-          </div>
-          <div class="modal-meta-item">
-            <span class="meta-label">PAYLOAD MASS</span>
-            <span class="meta-value" id="modal-mass">—</span>
-          </div>
-          <div class="modal-meta-item">
-            <span class="meta-label">FLIGHT NUMBER</span>
-            <span class="meta-value" id="modal-flight">—</span>
+
+
+          <div class="hud-mini-stats">
+            <div class="vital-item"><span class="vital-key">SIGNAL</span><span class="vital-val">ENCRYPTED</span></div>
+            <div class="vital-item"><span class="vital-key">LATENCY</span><span class="vital-val">2.4ms</span></div>
           </div>
         </div>
 
-        <div class="modal-details" id="modal-details">
-        </div>
-      </div>
 
-      <div class="modal-footer">
-        <button class="btn-ghost" id="modal-fav-btn">♡ SAVE MISSION</button>
-        <a class="btn-primary" id="modal-wiki-link" href="#" target="_blank" rel="noopener">VIEW WIKIPEDIA →</a>
+        <div class="hud-panel panel-map">
+            <div class="panel-header">SCAN ACTIVE</div>
+            <div class="hud-map-box">⌬</div>
+            <div class="hud-mini-stats">
+              <div class="vital-item"><span class="vital-key">SENSOR</span><span class="vital-val">OPTICAL</span></div>
+            </div>
+        </div>
+
+
+        <!-- Row 1 Right: Main Telemetry -->
+        <div class="hud-panel panel-vitals">
+            <div class="panel-header"> [ TELEMETRY ] </div>
+            <div class="vitals-grid">
+                <div class="vital-item"><span class="vital-key">VEHICLE</span><span class="vital-val" id="modal-rocket">—</span></div>
+                <div class="vital-item"><span class="vital-key">TIMESTAMP</span><span class="vital-val" id="modal-date">—</span></div>
+                <div class="vital-item"><span class="vital-key">TRAJECTORY</span><span class="vital-val" id="modal-orbit">—</span></div>
+                <div class="vital-item"><span class="vital-key">PAYLOAD_MASS</span><span class="vital-val" id="modal-mass">—</span></div>
+                <div class="vital-item"><span class="vital-key">MANUFACTURER</span><span class="vital-val" id="modal-manufacturer">—</span></div>
+                <div class="vital-item"><span class="vital-key">NATIONALITY</span><span class="vital-val" id="modal-nationality">—</span></div>
+                <div class="vital-item"><span class="vital-key">REGION</span><span class="vital-val" id="modal-region">—</span></div>
+                <div class="vital-item"><span class="vital-key">FLIGHT_ID</span><span class="vital-val" id="modal-flight">—</span></div>
+            </div>
+        </div>
+
+
+        <!-- Row 2 Left: Objective -->
+        <div class="hud-panel panel-description">
+            <div class="hud-module-title">> OBJECTIVE Briefing <</div>
+            <div id="modal-details" class="hud-description-text">
+                Analyzing re-entry profile...
+            </div>
+        </div>
+
+        <!-- Row 2 Middle: Core Technical -->
+        <div class="hud-panel panel-core">
+            <div class="panel-header"> [ CORE_HARDWARE ] </div>
+            <div class="vitals-grid">
+                <div class="vital-item"><span class="vital-key">SERIAL</span><span class="vital-val" id="modal-core-serial">—</span></div>
+                <div class="vital-item"><span class="vital-key">REUSE_COUNT</span><span class="vital-val" id="modal-reuse">—</span></div>
+                <div class="vital-item"><span class="vital-key">LANDING_INTENT</span><span class="vital-val" id="modal-landing">—</span></div>
+            </div>
+        </div>
+
+        <!-- Row 3: Actionable Data -->
+        <div class="hud-bottom-row">
+            <div class="hud-log-box">
+                <div id="hud-binary-noise">0xFF DECRYPTED</div>
+                <div>ENCRYPTION: ACTIVE // CHANNEL: 03A-XT</div>
+            </div>
+            <div class="hud-action-btns">
+                <a class="hud-btn-main btn-video" id="modal-video-link" target="_blank">▶ MISSION_VIDEO</a>
+                <a class="hud-btn-main btn-article" id="modal-article-link" target="_blank">▤ DATA_ENTRY</a>
+                <button class="hud-btn-main btn-fav" id="modal-fav-btn">SAVE MISSION</button>
+            </div>
+        </div>
+
       </div>
 
     </div>
@@ -403,8 +473,8 @@
 
     <footer class="footer">
     <div class="footer-left">
-      <span class="footer-logo" style="display: flex; align-items: center;"><img src="assets/logo.png" alt="Orion Arc Logo" style="height: 18px; width: auto; margin-right: 8px; filter: brightness(1.2);" /> ORION ARC</span>
-      <span class="footer-tagline">Track real-world rocket launches on an interactive 3D globe</span>
+      <span class="footer-logo" style="display: flex; align-items: center;"><img src="assets/logo.png" alt="Orion Arc Logo" style="height: 18px; width: auto; margin-right: 8px; filter: brightness(1.2) drop-shadow(0 0 4px rgba(79, 195, 247, 0.3));" /> ORION ARC</span>
+      <span class="footer-tagline">Track real-world rocket launches with cinematic visualizations</span>
     </div>
     <div class="footer-right">
       <span class="footer-api">Data · SpaceX API</span>
@@ -413,6 +483,9 @@
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script type="module" src="main.js"></script>
+  <script type="module">
+    import "./main.js?v=3";
+  </script>
 </body>
+
 </html>

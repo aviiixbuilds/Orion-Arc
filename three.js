@@ -1,9 +1,5 @@
 import { Application } from 'https://cdn.jsdelivr.net/npm/@splinetool/runtime@1.0.64/+esm';
 
-/**
- * SplineBackground Component
- * Uses the official Spline Runtime (Three.js based) for maximum stability.
- */
 class SplineBackground {
     constructor(selector, url) {
         this.container = document.querySelector(selector.startsWith('#') ? selector : '#' + selector);

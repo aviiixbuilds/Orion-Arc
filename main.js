@@ -2,8 +2,9 @@
 // ── UTILITIES ──
 const $ = id => document.getElementById(id);
 const $$ = selector => document.querySelectorAll(selector);
-const show = el => el?.classList.remove("hidden");
-const hide = el => el?.classList.add("hidden");
+const show = el => { if(!el) return; el.classList.remove("hidden"); setTimeout(() => el.classList.add("visible"), 10); };
+const hide = el => { if(!el) return; el.classList.remove("visible"); setTimeout(() => el.classList.add("hidden"), 400); };
+
 
 function formatDate(isoString) {
   if (!isoString) return "—";
@@ -76,9 +77,10 @@ function calcSuccessRate(launches) {
 function formatMass(kg) { return kg ? kg.toLocaleString() + " kg" : "—"; }
 
 function getLaunchStatus(launch) {
-  if (launch.upcoming) return "upcoming";
+  if (launch.upcoming) return "pending";
   return launch.success ? "success" : "failed";
 }
+
 
 function debounce(fn, delay = 300) {
   let timer;
@@ -276,7 +278,7 @@ function initTimelineTypewriter() {
         return;
     }
     
-    const words = ["across all agencies", "around the world", "into deep space", "since 1950"];
+    const words = ["across all agencies", "around the world", "into deep space", "since 2006"];
     
     new Typewriter(el, words, {
         speed: 80,
@@ -310,7 +312,7 @@ function createLaunchCard(launch) {
       <button class="card-fav-btn" data-id="${launch.id}">♡</button>
     </div>
     <div class="card-body">
-      <div class="card-header-row"><span class="card-flight">#${launch.flightNumber}</span><span class="badge badge-${status}">${status.toUpperCase()}</span></div>
+      <div class="card-header-row"><span class="card-flight">#${launch.flight_number}</span><span class="badge badge-${status}">${status.toUpperCase()}</span></div>
       <h3 class="card-name">${launch.name}</h3>
       <div class="card-meta">
         <span class="card-meta-item"><img src="assets/Spaceship.png" class="meta-icon-img" /> ${launch.rocketName}</span>
@@ -459,30 +461,96 @@ function startClock() {
 
 function renderModal(launch) {
   const status = getLaunchStatus(launch);
-  $("modal-badge").textContent = status.toUpperCase();
-  $("modal-badge").className = `modal-badge badge badge-${status}`;
-  $("modal-mission-name").textContent = launch.name;
-  $("modal-rocket").textContent = launch.rocketName;
-  $("modal-date").textContent = formatDate(launch.date);
-  $("modal-site").textContent = launch.siteFullName;
-  $("modal-orbit").textContent = launch.orbit;
-  $("modal-mass").textContent = formatMass(launch.payloadMass);
-  $("modal-flight").textContent = `#${launch.flightNumber}`;
+  const badge = $("modal-badge");
+  badge.textContent = status === 'success' ? 'STABLE' : (status === 'pending' ? 'PENDING' : 'ERROR: DEGRADED');
 
-  const wiki = $("modal-wiki-link");
-  if (launch.links?.wikipedia) { wiki.href = launch.links.wikipedia; show(wiki); } else hide(wiki);
+
+  badge.className = `val badge-${status}`;
+  
+  $("modal-mission-name").textContent = launch.name?.toUpperCase();
+  $("modal-rocket").textContent = launch.rocketName?.toUpperCase() || 'UNKNOWN';
+  $("modal-date").textContent = formatDate(launch.date);
+  $("modal-site").textContent = (launch.siteFullName || 'OFF-SHORE').toUpperCase();
+  $("modal-orbit").textContent = (launch.orbit || 'LEO').toUpperCase();
+  $("modal-mass").textContent = launch.payloadMass ? `${launch.payloadMass} KG` : 'N/A';
+  $("modal-flight").textContent = `ID_${launch.flight_number || '---'}`;
+
+  // Core Hardware Data
+  const core = launch.cores?.[0];
+  $("modal-core-serial").textContent = core?.coreSerial?.toUpperCase() || 'UNKNOWN_STG';
+  $("modal-reuse").textContent = core?.flight ? `${core.flight}x FLOWN` : 'NEW_BUILD';
+  $("modal-landing").textContent = core?.landingIntent ? (core.landingSuccess ? 'SUCCESS' : 'TBD/INTENT') : 'EXPENDABLE';
+
+  // Additional technical data
+  if($("modal-manufacturer")) $("modal-manufacturer").textContent = (launch.manufacturer || '—').toUpperCase();
+  if($("modal-nationality")) $("modal-nationality").textContent = (launch.nationality || '—').toUpperCase();
+  if($("modal-region")) $("modal-region").textContent = (launch.siteRegion || 'GLOBAL').toUpperCase();
+
+  // Links as separate buttons
+  const videoBtn = $("modal-video-link");
+  const articleBtn = $("modal-article-link");
+
+  if (launch.links?.webcast) {
+    videoBtn.href = launch.links.webcast;
+    videoBtn.classList.remove("disabled");
+    videoBtn.textContent = "▶ STREAM_MISSION";
+    videoBtn.style.opacity = "1";
+    videoBtn.style.pointerEvents = "auto";
+  } else {
+    videoBtn.href = "javascript:void(0)";
+    videoBtn.classList.add("disabled");
+    videoBtn.textContent = "▶ VIDEO_N/A";
+    videoBtn.style.opacity = "0.4";
+    videoBtn.style.pointerEvents = "none";
+  }
+
+  if (launch.links?.article) {
+    articleBtn.href = launch.links.article;
+    articleBtn.classList.remove("disabled");
+    articleBtn.textContent = "▤ READ_LOGS";
+    articleBtn.style.opacity = "1";
+    articleBtn.style.pointerEvents = "auto";
+  } else {
+    articleBtn.href = "javascript:void(0)";
+    articleBtn.classList.add("disabled");
+    articleBtn.textContent = "▤ LOG_N/A";
+    articleBtn.style.opacity = "0.4";
+    articleBtn.style.pointerEvents = "none";
+  }
+
 
   const favBtn = $("modal-fav-btn");
-  favBtn.textContent = getSavedIds().includes(launch.id) ? "♥ SAVED" : "♡ SAVE MISSION";
+  const isSaved = getSavedIds().includes(launch.id);
+  favBtn.textContent = isSaved ? '♥ SAVED' : '♡ SAVE';
   favBtn.dataset.id = launch.id;
 
   const details = $("modal-details");
-  details.innerHTML = (launch.details ? `<p class="modal-description">${launch.details}</p>` : "") +
-    (launch.links?.article ? `<a href="${launch.links.article}" target="_blank" class="modal-link">READ ARTICLE →</a>` : "") +
-    (launch.links?.webcast ? `<a href="${launch.links.webcast}" target="_blank" class="modal-link">WATCH WEBCAST →</a>` : "");
+  details.innerHTML = (launch.details ? `<p>${launch.details}</p>` : "ANALYZING RE-ENTRY PROFILE... NO ADDITIONAL LOG DATA FOUND.");
+
+  // Technical flair
+  const decor = document.querySelector("#hud-binary-noise");
+  if (decor) decor.textContent = `HEX_STREAM: ${Math.random().toString(16).substring(2, 12).toUpperCase()}`;
+  
+  const loading = document.querySelector(".loading-val");
+  if (loading) {
+    let count = 0;
+    const target = Math.floor(Math.random() * 20) + 80; // 80-99%
+    const duration = 1200; // 1.2s total
+    const start = performance.now();
+    
+    function update(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3); // ease-out-cubic
+      count = Math.floor(ease * target);
+      loading.textContent = `${count}%`;
+      if (p < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  }
 
   show($("modal-overlay"));
 }
+
 
 function renderPage(page) {
     state.currentPage = page;
@@ -627,8 +695,9 @@ function filterByAgency(launches, agency) {
 
 function filterByStatus(launches, status) {
   if (!status || status === "all") return launches;
-  if (status === "upcoming") return launches.filter(l => l.upcoming === true);
+  if (status === "pending") return launches.filter(l => l.upcoming === true);
   if (status === "success") return launches.filter(l => l.success === true && !l.upcoming);
+
   if (status === "failed") return launches.filter(l => l.success === false && !l.upcoming);
   return launches;
 }
