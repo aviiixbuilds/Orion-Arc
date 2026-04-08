@@ -979,7 +979,7 @@ h4 {
   max-width: 720px;
   height: auto;
   max-height: 90vh;
-  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), url('assets/Background-Satellite.jpg');
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('assets/Background-Satellite.jpg');
   background-size: cover;
   background-position: center;
   position: relative;
@@ -987,6 +987,7 @@ h4 {
   font-family: var(--font-mono);
   padding: 20px;
   border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -1126,7 +1127,7 @@ h4 {
 /* Base Panel Style */
 .hud-panel {
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.15);
   position: relative;
   padding: 15px;
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px),
@@ -1340,6 +1341,7 @@ h4 {
 .hud-btn-main {
   background: transparent;
   border: 1.5px solid #00e5ff;
+  border-radius: 8px;
   color: #00e5ff;
   padding: 10px 20px;
   font-size: 0.75rem;
@@ -1397,9 +1399,7 @@ h4 {
 }
 
 .badge-pending {
-  background: rgba(255, 171, 64, 0.1);
   color: #ffab40;
-  border: none;
 }
 
 

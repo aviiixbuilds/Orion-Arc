@@ -521,7 +521,8 @@ function renderModal(launch) {
 
   const favBtn = $("modal-fav-btn");
   const isSaved = getSavedIds().includes(launch.id);
-  favBtn.textContent = isSaved ? '♥ SAVED' : '♡ SAVE';
+  favBtn.innerHTML = isSaved ? '♥ SAVED' : '♡ SAVE';
+  favBtn.classList.toggle('saved', isSaved);
   favBtn.dataset.id = launch.id;
 
   const details = $("modal-details");
@@ -752,6 +753,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         else if (id) renderModal(state.allLaunches.find(l => l.id === id));
     };
     $("modal-close").onclick = $("modal-overlay").onclick = (e) => { if(e.target === $("modal-overlay") || e.target === $("modal-close")) hide($("modal-overlay")); };
+    $("modal-fav-btn").onclick = () => {
+        const id = $("modal-fav-btn").dataset.id;
+        if (!id) return;
+        const nowSaved = toggleFavorite(id);
+        $("modal-fav-btn").innerHTML = nowSaved ? '♥ SAVED' : '♡ SAVE';
+        $("modal-fav-btn").classList.toggle('saved', nowSaved);
+        updateFavButtons(id, nowSaved);
+        renderFavs();
+    };
     $("theme-toggle").onclick = () => {
         const next = document.body.getAttribute("data-theme") === "dark" ? "light" : "dark";
         document.body.setAttribute("data-theme", next); localStorage.setItem("orion-theme", next);
