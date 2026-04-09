@@ -1042,8 +1042,9 @@ h4 {
 
 .info-pair {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  gap: 12px;
 }
 
 .info-pair.location-highlight {
@@ -1056,10 +1057,11 @@ h4 {
 }
 
 .info-pair .key {
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.85);
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
+  min-width: 100px;
 }
 
 .info-pair .val {
@@ -1136,12 +1138,14 @@ h4 {
 }
 
 .panel-header {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   color: #ff9800;
+  font-weight: 800;
   margin-bottom: 10px;
   display: flex;
   align-items: center;
   gap: 8px;
+  text-transform: uppercase;
 }
 
 .panel-header::before,
@@ -1155,9 +1159,10 @@ h4 {
 .hud-module-title {
   color: #ff9800;
   font-size: 0.8rem;
-  font-weight: bold;
+  font-weight: 800;
   margin-bottom: 10px;
   display: inline-block;
+  text-transform: uppercase;
 }
 
 /* Percent Loader Panel */
@@ -1330,10 +1335,11 @@ h4 {
 
 .hud-log-box {
   flex: 1;
-  font-size: 0.6rem;
-  color: rgba(255, 152, 0, 0.4);
+  font-size: 0.65rem;
+  color: rgba(255, 152, 0, 0.6);
   border-left: 2px solid #ff9800;
   padding-left: 10px;
+  font-weight: 800;
 }
 
 .hud-action-btns {
@@ -1390,7 +1396,16 @@ h4 {
   background: none;
   border: none;
   color: #ff9800;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 100;
+  transition: transform 0.2s ease;
+}
+
+.hud-close:hover {
+  transform: scale(1.1);
 }
 
 .badge-success {
