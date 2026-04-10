@@ -306,10 +306,11 @@ function createLaunchCard(launch) {
   card.className = "launch-card";
   card.dataset.id = launch.id;
   const img = launch.links?.patch?.small || "";
+  const isSaved = getSavedIds().includes(launch.id);
   card.innerHTML = `
     <div class="card-top">
       <div class="card-patch">${img ? `<img src="${img}" loading="lazy" />` : `<img src="assets/logo.png" class="placeholder-patch" />`}</div>
-      <button class="card-fav-btn" data-id="${launch.id}">♡</button>
+      <button class="card-fav-btn ${isSaved ? 'saved' : ''}" data-id="${launch.id}">${isSaved ? '♥' : '♡'}</button>
     </div>
     <div class="card-body">
       <div class="card-header-row"><span class="card-flight">#${launch.flight_number}</span><span class="badge badge-${status}">${status.toUpperCase()}</span></div>
