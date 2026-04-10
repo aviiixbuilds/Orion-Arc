@@ -2898,7 +2898,7 @@ h4 {
   perspective: 1200px;
   display: flex;
   flex-direction: column;
-  items: center;
+  align-items: center;
   gap: 60px;
 }
 
