@@ -711,6 +711,8 @@ function sortLaunches(launches, sortVal) {
   const arr = [...launches];
   if (sortVal === "date-asc") return arr.sort((a, b) => new Date(a.date) - new Date(b.date));
   if (sortVal === "name-asc") return arr.sort((a, b) => a.name.localeCompare(b.name));
+  if (sortVal === "mass-desc") return arr.sort((a, b) => (b.payloadMass || 0) - (a.payloadMass || 0));
+  if (sortVal === "mass-asc") return arr.sort((a, b) => (a.payloadMass || 0) - (b.payloadMass || 0));
   return arr.sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
@@ -730,6 +732,15 @@ function applyFilters() {
   renderPage(1);
 }
 
+function resetFilters() {
+  if ($("search-input")) $("search-input").value = "";
+  if ($("filter-agency")) $("filter-agency").value = "all";
+  if ($("filter-status")) $("filter-status").value = "all";
+  if ($("filter-orbit")) $("filter-orbit").value = "all";
+  if ($("sort-select")) $("sort-select").value = "date-desc";
+  applyFilters();
+}
+
 function initFilters(state, renderPage) {
     const run = debounce(applyFilters);
     $("search-input")?.addEventListener("input", run);
@@ -737,6 +748,12 @@ function initFilters(state, renderPage) {
     $("filter-status")?.addEventListener("change", applyFilters);
     $("filter-orbit")?.addEventListener("change", applyFilters);
     $("sort-select")?.addEventListener("change", applyFilters);
+
+    $("empty-reset")?.addEventListener("click", resetFilters);
+    $("search-clear")?.addEventListener("click", () => {
+        if ($("search-input")) $("search-input").value = "";
+        applyFilters();
+    });
 }
 
 function setStatusLive() { if($("status-dot")) $("status-dot").classList.add("live"); if($("status-label")) $("status-label").textContent = "LIVE DATA"; }
