@@ -60,6 +60,12 @@ function latLngToXYZ(lat, lng, radius) {
   };
 }
 
+function initGlobeInteractions(globe) {
+  globe.addEventListener('mousedown', () => globe.style.cursor = 'grabbing');
+  globe.addEventListener('mouseup', () => globe.style.cursor = 'grab');
+  globe.addEventListener('wheel', (e) => e.preventDefault(), { passive: false });
+}
+
 function groupByYear(launches) {
   return launches.reduce((acc, launch) => {
     const year = getYear(launch.date);
@@ -440,10 +446,7 @@ async function init() {
       
       const globeContainer = $("globe-canvas-container");
       if (globeContainer) {
-          initGlobe(globeContainer, (pad) => { 
-              const launch = state.allLaunches.find(l => l.siteName === pad.siteName);
-              if (launch) renderModal(launch);
-          });
+          initGlobe(globeContainer, shaped);
       }
 
 
@@ -661,7 +664,89 @@ function initIntersectionObserver() {
 // ── GLOBE (Three.js) ──
 let globeScene, globeCamera, globeRenderer, globeEarth, globeAtmosphere, globePins = [], globeRaycaster = new THREE.Raycaster(), globeMouse = new THREE.Vector2();
 
-function initGlobe(container, onClick) {
+function createTextLabel(text, color = "#00e5ff") {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = 512; canvas.height = 128;
+    ctx.font = "Bold 48px 'JetBrains Mono', monospace";
+    ctx.fillStyle = color;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = color;
+    ctx.fillText(text.toUpperCase(), 256, 64);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(2.5, 0.6, 1);
+    return sprite;
+}
+
+function latLongToVector3(lat, lon, radius) {
+    const phi = (90 - lat) * (Math.PI / 180);
+    const theta = (lon + 180) * (Math.PI / 180);
+    const x = -(radius * Math.sin(phi) * Math.cos(theta));
+    const z = (radius * Math.sin(phi) * Math.sin(theta));
+    const y = (radius * Math.cos(phi));
+    return new THREE.Vector3(x, y, z);
+}
+
+function addLaunchpadPins(scene, launches, radius) {
+    const pads = [];
+    const seen = new Set();
+    launches.forEach(l => {
+        if (!l.siteLat || !l.siteLng || seen.has(l.siteName)) return;
+        seen.add(l.siteName);
+        pads.push({ lat: l.siteLat, lng: l.siteLng, name: l.siteName });
+    });
+
+    const pinTexture = new THREE.TextureLoader().load("assets/content.png");
+    const pinGroup = new THREE.Group();
+
+    pads.forEach(pad => {
+        const pos = latLongToVector3(pad.lat, pad.lng, radius);
+        
+        // DIGITAL MAPPING PIN (Sprite)
+        const pinMat = new THREE.SpriteMaterial({ 
+            map: pinTexture, 
+            transparent: true, 
+            opacity: 1.0,
+            depthWrite: false, 
+            depthTest: true
+        });
+        const pin = new THREE.Sprite(pinMat);
+        pin.scale.set(0.01, 0.01, 1); // Start small for anim
+        pin.position.copy(pos.clone().multiplyScalar(1.08));
+        pin.userData = { type: 'pin', targetScale: 1.2, introProgress: 0 };
+        pinGroup.add(pin);
+
+        // LOCATION LABEL
+        const label = createTextLabel(pad.name);
+        label.position.copy(pos.clone().multiplyScalar(1.22));
+        label.scale.set(0.01, 0.01, 1);
+        label.userData = { type: 'label', targetScaleX: 2.5, targetScaleY: 0.6, introProgress: 0 };
+        pinGroup.add(label);
+
+        // HIGHLIGHT GRADIENT
+        const auraGeo = new THREE.RingGeometry(0.1, 0.45, 32);
+        const auraMat = new THREE.MeshBasicMaterial({ 
+            color: 0x00e5ff, 
+            transparent: true, 
+            opacity: 0.15, 
+            side: THREE.DoubleSide,
+            depthWrite: false
+        });
+        const aura = new THREE.Mesh(auraGeo, auraMat);
+        aura.position.copy(pos.clone().multiplyScalar(1.01));
+        aura.lookAt(new THREE.Vector3(0,0,0));
+        pinGroup.add(aura);
+    });
+    scene.add(pinGroup);
+    return pinGroup;
+}
+
+function initGlobe(container, launches) {
     if (!container || !window.THREE) return;
     globeScene = new THREE.Scene();
     globeCamera = new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, 0.1, 1000);
@@ -672,14 +757,71 @@ function initGlobe(container, onClick) {
     globeScene.add(new THREE.AmbientLight(0xffffff, 0.4));
     const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(5,3,5); globeScene.add(sun);
     
-    const geo = new THREE.SphereGeometry(5, 64, 64);
+    const globeRadius = 5;
+    const geo = new THREE.SphereGeometry(globeRadius, 64, 64);
     const texture = new THREE.TextureLoader().load("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg");
     globeEarth = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ map: texture })); globeScene.add(globeEarth);
 
-    const atmosphereGeo = new THREE.SphereGeometry(5.2, 64, 64);
-    globeAtmosphere = new THREE.Mesh(atmosphereGeo, new THREE.MeshPhongMaterial({ color: 0x4fc3f7, transparent: true, opacity: 0.1 })); globeScene.add(globeAtmosphere);
+    const atmosphereGeo = new THREE.SphereGeometry(globeRadius + 0.1, 64, 64);
+    globeAtmosphere = new THREE.Mesh(atmosphereGeo, new THREE.MeshPhongMaterial({ color: 0x4fc3f7, transparent: true, opacity: 0.15 })); globeScene.add(globeAtmosphere);
 
-    function loop() { requestAnimationFrame(loop); globeEarth.rotation.y += 0.001; globeAtmosphere.rotation.y += 0.001; globeRenderer.render(globeScene, globeCamera); }
+    // ADD PINS
+    const pins = addLaunchpadPins(globeEarth, launches, globeRadius);
+
+    // INTERACTION LOGIC
+    let isDragging = false, mouseX = 0, mouseY = 0;
+    container.onmousedown = (e) => { isDragging = true; mouseX = e.clientX; mouseY = e.clientY; container.style.cursor = 'grabbing'; };
+    window.onmousemove = (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - mouseX, dy = e.clientY - mouseY;
+        globeEarth.rotation.y += dx * 0.005; globeEarth.rotation.x += dy * 0.005;
+        globeAtmosphere.rotation.y += dx * 0.005; globeAtmosphere.rotation.x += dy * 0.005;
+        
+        // Also rotate the pins (they are in the scene directly, so rotating the Earth isn't enough if they aren't children)
+        // Grouping them is better
+        mouseX = e.clientX; mouseY = e.clientY;
+    };
+    window.onmouseup = () => { isDragging = false; container.style.cursor = 'grab'; };
+    container.onwheel = (e) => {
+        e.preventDefault();
+        globeCamera.position.z += e.deltaY * 0.01;
+        globeCamera.position.z = Math.max(7, Math.min(25, globeCamera.position.z));
+    };
+
+    function loop() { 
+        requestAnimationFrame(loop); 
+        const time = Date.now() * 0.001;
+        
+        if (!isDragging) {
+            globeEarth.rotation.y += 0.0015; 
+            globeAtmosphere.rotation.y += 0.0015; 
+        }
+
+        // Pulse & Reveal the pins
+        if (pins) {
+            pins.children.forEach((child, i) => {
+                // Intro Animation
+                if (child.userData && child.userData.introProgress < 1) {
+                    child.userData.introProgress += 0.02;
+                    const p = child.userData.introProgress;
+                    if (child.userData.type === 'pin') {
+                        const s = child.userData.targetScale * p;
+                        child.scale.set(s, s, 1);
+                    } else if (child.userData.type === 'label') {
+                        child.scale.set(child.userData.targetScaleX * p, child.userData.targetScaleY * p, 1);
+                    }
+                }
+
+                if (child.geometry && child.geometry.type === 'RingGeometry') {
+                    const s = 1 + Math.sin(time * 3 + i) * 0.1;
+                    child.scale.set(s, s, s);
+                    child.material.opacity = 0.4 + Math.sin(time * 3 + i) * 0.2;
+                }
+            });
+        }
+
+        globeRenderer.render(globeScene, globeCamera); 
+    }
     loop();
 }
 
