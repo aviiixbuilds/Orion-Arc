@@ -760,9 +760,33 @@ function setStatusLive() { if($("status-dot")) $("status-dot").classList.add("li
 function setStatusError() { if($("status-dot")) $("status-dot").classList.add("error"); if($("status-label")) $("status-label").textContent = "API ERROR"; }
 
 document.addEventListener("DOMContentLoaded", async () => {
+    // ── CUBE LOADER ORCHESTRATION ──
+    const loader = $("cube-loader-overlay");
+    const startTime = Date.now();
+
     initStatsMarquee();
     initTimelineTypewriter();
-    await init();
+
+    // Start fetching and rendering in the background after a short delay
+    // to give the initial cube entrance animation full CPU priority.
+    const initPromise = new Promise(resolve => {
+        setTimeout(async () => {
+            await init();
+            resolve();
+        }, 300);
+    });
+
+    // Wait at least 2 seconds as requested, but start count from now
+    const ensureTwoSeconds = new Promise(resolve => setTimeout(resolve, 2000));
+
+    await Promise.all([initPromise, ensureTwoSeconds]);
+
+    // Slowly blur and vanish
+    if (loader) {
+        loader.classList.add("fade-out");
+        // Remove from DOM after transition finishes for performance
+        setTimeout(() => loader.remove(), 1000);
+    }
 
     $("launches-grid").onclick = $("favorites-grid").onclick = e => {
         const id = e.target.closest("[data-id]")?.dataset.id;

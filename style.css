@@ -1438,6 +1438,32 @@ h4 {
   padding: 20px 0;
 }
 
+.launches-section {
+  position: relative;
+  padding: 60px 40px !important;
+  margin: 40px -40px;
+  border-radius: 24px;
+  border: 1px solid rgba(79, 195, 247, 0.2);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  z-index: 1;
+}
+
+.launches-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(rgba(8, 11, 15, 0.4), rgba(8, 11, 15, 0.6)), url('assets/launch-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  z-index: -1;
+  opacity: 1;
+}
+
 
 .globe-wrapper {
   display: grid;
@@ -1681,12 +1707,15 @@ h4 {
 
 .page-btn {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-  padding: 7px 16px;
-  border-radius: var(--radius);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-primary);
+  border: 2px solid rgba(79, 195, 247, 0.4);
+  background: rgba(8, 11, 15, 0.6);
+  padding: 10px 24px;
+  border-radius: var(--radius-md);
+  text-transform: uppercase;
 }
 
 .page-btn:hover:not(:disabled) {
@@ -1701,15 +1730,17 @@ h4 {
 
 .page-num {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  width: 32px;
-  height: 32px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  color: var(--text-muted);
+  border-radius: var(--radius-md);
+  border: 2px solid rgba(79, 195, 247, 0.3);
+  background: rgba(8, 11, 15, 0.6);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all var(--transition);
 }
@@ -1901,15 +1932,14 @@ h4 {
 .neon-bar-val {
   font-family: var(--font-display);
   font-size: 1.6rem;
-  /* Increased size for prominence */
   font-weight: 800;
   color: #fff;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   text-shadow: 0 0 15px rgba(0, 230, 118, 0.9), 0 0 30px rgba(79, 195, 247, 0.6);
   opacity: 0;
-  transform: translateZ(30px) scaleY(1.1);
-  /* Slightly taller to match Bebas Neue style */
+  transform: translateZ(40px) scaleY(1.1);
   letter-spacing: 0.05em;
+  pointer-events: none;
 }
 
 .neon-bar-year {
@@ -1930,12 +1960,12 @@ h4 {
 .neon-bar-3d {
   position: relative;
   width: 45px;
-  /* 1.25x scaled width */
   height: 0;
   flex-shrink: 0;
-  /* Refuse flex compression, true height wins */
   transform-style: preserve-3d;
   transform: rotateX(15deg) rotateY(-20deg);
+  transform-origin: bottom center;
+  transition: height 0.1s ease-out;
 }
 
 .face {
@@ -2861,4 +2891,151 @@ h4 {
 .typewriter-cursor {
   font-weight: 700;
   color: var(--text-accent);
+}
+/* ── 12. CUBE LOADER ── */
+.cube-loader-overlay {
+  position: fixed;
+  inset: 0;
+  background: #080b0f;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 1s ease, filter 1s ease, visibility 1s;
+}
+
+.cube-loader-overlay.fade-out {
+  opacity: 0;
+  filter: blur(20px);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.cube-perspective {
+  perspective: 1200px;
+  display: flex;
+  flex-direction: column;
+  items: center;
+  gap: 60px;
+}
+
+.cube-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  transform-style: preserve-3d;
+  animation: cubeSpin 8s linear infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  will-change: transform;
+}
+
+.cube-core {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 30px;
+  height: 30px;
+  background: #fff;
+  border-radius: 50%;
+  filter: blur(8px);
+  box-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
+  animation: pulse-fast 2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.side-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.face {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  /* Removed backdrop-filter for performance */
+  animation: breathe-face 3s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.face.cyan {
+  background: rgba(34, 211, 238, 0.1);
+  border: 2px solid #22d3ee;
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.4);
+}
+
+.face.purple {
+  background: rgba(168, 85, 247, 0.1);
+  border: 2px solid #a855f7;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+}
+
+.face.indigo {
+  background: rgba(99, 102, 241, 0.1);
+  border: 2px solid #6366f1;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}
+
+.front  { transform: rotateY(0deg); }
+.back   { transform: rotateY(180deg); }
+.right  { transform: rotateY(90deg); }
+.left   { transform: rotateY(-90deg); }
+.top    { transform: rotateX(90deg); }
+.bottom { transform: rotateX(-90deg); }
+
+.cube-floor-shadow {
+  position: absolute;
+  bottom: -80px;
+  width: 100px;
+  height: 30px;
+  background: rgba(0, 0, 0, 0.4);
+  filter: blur(20px);
+  border-radius: 100%;
+  animation: shadow-breathe 3s ease-in-out infinite;
+}
+
+.loader-text-wrapper {
+  text-align: center;
+  margin-top: 80px;
+}
+
+.loader-main-text {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: #22d3ee;
+  margin-bottom: 8px;
+}
+
+.loader-sub-text {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: #7a8fa0;
+  letter-spacing: 0.05em;
+}
+
+@keyframes cubeSpin {
+  0% { transform: rotateX(0deg) rotateY(0deg); }
+  100% { transform: rotateX(360deg) rotateY(360deg); }
+}
+
+@keyframes breathe-face {
+  0%, 100% { transform: translateZ(50px); opacity: 0.8; }
+  50% { transform: translateZ(80px); opacity: 0.4; border-color: rgba(255, 255, 255, 0.8); }
+}
+
+@keyframes pulse-fast {
+  0%, 100% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes shadow-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.5); opacity: 0.2; }
 }
