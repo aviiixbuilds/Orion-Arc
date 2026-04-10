@@ -1894,18 +1894,23 @@ h4 {
 
 .timeline-chart {
   width: 100%;
-  height: min-content;
-  min-height: 400px;
+  height: 100%;
   background: transparent;
   border: none;
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: visible;
   display: flex;
   align-items: flex-end;
+  /* Ground bars to the bottom of the container */
   justify-content: center;
-  gap: clamp(12px, 2vw, 32px);
-  padding: 80px 40px 40px;
+  gap: clamp(8px, 1.5vw, 24px);
+  padding-bottom: 50px;
+  padding-top: 60px;
   position: relative;
   z-index: 5;
   scrollbar-width: none;
+  perspective: 1200px;
 }
 
 .timeline-chart::-webkit-scrollbar {
@@ -1919,8 +1924,8 @@ h4 {
   align-items: center;
   justify-content: flex-end;
   flex-shrink: 0;
+  height: 100%;
   width: 56px;
-  height: auto;
 }
 
 .neon-bar-val {
@@ -1928,26 +1933,21 @@ h4 {
   font-size: 1.6rem;
   font-weight: 800;
   color: #fff;
-  margin-bottom: 12px;
+  margin-bottom: 24px;
   text-shadow: 0 0 15px rgba(0, 230, 118, 0.9), 0 0 30px rgba(79, 195, 247, 0.6);
   opacity: 0;
-  transform: translateZ(40px) scaleY(1.1);
+  transform: translateZ(30px) scaleY(1.1);
   letter-spacing: 0.05em;
-  pointer-events: none;
 }
 
 .neon-bar-year {
   font-family: var(--font-mono);
   font-size: 1rem;
-  /* Slightly larger as requested */
   font-weight: 700;
-  /* Bolder as requested */
   color: #ffffff !important;
-  /* Force to white only, even in light mode */
   margin-top: 20px;
   transform: translateZ(10px);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  /* Subtle shadow for readability on light backgrounds */
 }
 
 /* THE 3D PILLAR */
@@ -1956,10 +1956,8 @@ h4 {
   width: 45px;
   height: 0;
   flex-shrink: 0;
-  background: linear-gradient(180deg, #00e676, #0081CB);
-  border-radius: 8px 8px 2px 2px;
-  box-shadow: 0 0 20px rgba(0, 230, 118, 0.4);
-  transform: translateZ(0);
+  transform-style: preserve-3d;
+  transform: rotateX(15deg) rotateY(-20deg);
 }
 
 .face {
@@ -1973,40 +1971,31 @@ h4 {
   height: 100%;
   background: linear-gradient(180deg, #00e676, #00897b);
   transform: translateZ(15px);
-  /* Matches half of the 30px depth */
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-bottom: none;
   border-radius: 8px 8px 0 0;
-  /* soften edges */
 }
 
 .face.right {
   width: 30px;
-  /* Depth of 30px */
   height: 100%;
   background: linear-gradient(180deg, #00b0ff, #006064);
   right: 0;
   left: auto;
   transform: translateX(15px) rotateY(90deg);
-  /* matches half width of 30px */
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-bottom: none;
   border-radius: 8px 8px 0 0;
-  /* soften edges */
 }
 
 .face.top {
   width: 100%;
   height: 30px;
-  /* Depth of 30px */
   background: #69f0ae;
-  /* Slightly darker cool green for realism without glow */
   top: 0;
   bottom: auto;
   transform: translateY(-15px) rotateX(90deg);
-  /* matches half height of 30px */
   border-radius: 8px;
-  /* soften geometry to create a pill/bevel effect */
 }
 
 .agencies-grid {
@@ -2948,28 +2937,27 @@ h4 {
   will-change: transform;
 }
 
-.face {
+.loader-face {
   width: 100%;
   height: 100%;
   position: absolute;
-  /* Removed backdrop-filter for performance */
   animation: breathe-face 3s ease-in-out infinite;
   will-change: transform, opacity;
 }
 
-.face.cyan {
+.loader-face.cyan {
   background: rgba(34, 211, 238, 0.1);
   border: 2px solid #22d3ee;
   box-shadow: 0 0 15px rgba(34, 211, 238, 0.4);
 }
 
-.face.purple {
+.loader-face.purple {
   background: rgba(168, 85, 247, 0.1);
   border: 2px solid #a855f7;
   box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
 }
 
-.face.indigo {
+.loader-face.indigo {
   background: rgba(99, 102, 241, 0.1);
   border: 2px solid #6366f1;
   box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
