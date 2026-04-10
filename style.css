@@ -468,12 +468,9 @@ h4 {
   position: relative;
   font-family: 'Bebas Neue', var(--font-display);
   font-size: clamp(6rem, 21vw, 18rem);
-  /* Increased size roughly 1.5x */
   font-weight: 400;
-  /* Bebas Neue is naturally bold */
   letter-spacing: 0.02em;
   line-height: 1;
-  /* Maintain the CONDENSER tall height effect without bulging side-to-side */
   transform: scaleY(1.4);
 }
 
@@ -963,6 +960,7 @@ h4 {
   justify-content: center;
   padding: 20px;
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease;
@@ -1132,9 +1130,8 @@ h4 {
   background: rgba(255, 255, 255, 0.03);
   border: 2px solid rgba(255, 255, 255, 0.15);
   position: relative;
-  padding: 10px 12px;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px),
-      calc(100% - 15px) 100%, 0 100%);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+  -webkit-clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
 }
 
 .panel-header {
@@ -1923,6 +1920,7 @@ h4 {
   border-radius: 20px;
   border: 1px solid var(--border);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .timeline-chart {
