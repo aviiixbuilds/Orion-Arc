@@ -24,6 +24,9 @@
 
 While most trackers give you a boring list, Orion Arc renders launches with a **cinematic scroll-driven hero video**, a fully interactive **3D Spatial Globe**, and a custom **Canvas-based Orbital Visualiser**. Every launch site is an animated pin on Earth that tracks seamlessly without horizon-clipping. Select a mission — you're greeted with a high-fidelity cinematic telemetry HUD. The whole interface is designed to feel like an actual operations center, not a college assignment.
 
+<br>
+<img src="assets/Screenshots/screenshot1.jpeg" alt="Dashboard" width="100%">
+
 ---
 
 ## 💡 Core Idea and Vision
@@ -33,6 +36,9 @@ Most space apps treat launches as rows in a database. Orion Arc treats them as *
 The central idea is simple: if you want to understand the scale and geography of humanity's reach into space, a list tells you nothing. Seeing that trajectory arcs fan out in predictable orbital directions, that some launch sites have fired hundreds of missions while others have fired one — that's the kind of insight that emerges when data is visualised.
 
 The vision for Orion Arc is to be the dashboard that makes space feel **visceral and present**, not archived and academic. Every design decision flows from that — dark UI because space is dark, animated orbital trajectories because rockets don't go straight up — they arc across the sky.
+
+<br>
+<img src="assets/Screenshots/screenshot5.jpeg" alt="Dark Mode UI" width="100%">
 
 ---
 
@@ -51,6 +57,11 @@ The vision for Orion Arc is to be the dashboard that makes space feel **visceral
 | ⏱️ **Live UTC/IST Clock** | Real-time clock in the navigation bar |
 | 📅 **Launch Timeline** | Chronological visual timeline of all launches |
 
+<br>
+<img src="assets/Screenshots/screenshot2.jpeg" alt="Orbital Map View" width="100%">
+<br>
+<img src="assets/Screenshots/screenshot4.jpeg" alt="Timeline Chart" width="100%">
+
 ### 🟡 Tech & Performance Enhancements
 
 | Feature | Description |
@@ -63,15 +74,8 @@ The vision for Orion Arc is to be the dashboard that makes space feel **visceral
 | 🚀 **High-Res Canvas Text** | Uses 1024x256 custom canvases with LinearFiltering for crystal clear 3D globe fonts |
 | 🧹 **Lean Codebase** | Free from unnecessary code bloat, strictly maintained pure Vanilla engineering |
 
----
-
-## 📸 Screenshots
-
-<img src="assets/Screenshots/screenshot1.jpeg" alt="Screenshot 1" width="100%">
-<img src="assets/Screenshots/screenshot2.jpeg" alt="Screenshot 2" width="100%">
-<img src="assets/Screenshots/screenshot3.jpeg" alt="Screenshot 3" width="100%">
-<img src="assets/Screenshots/screenshot4.jpeg" alt="Screenshot 4" width="100%">
-<img src="assets/Screenshots/screenshot5.jpeg" alt="Screenshot 5" width="100%">
+<br>
+<img src="assets/Screenshots/screenshot3.jpeg" alt="Telemetry HUD" width="100%">
 
 ---
 
