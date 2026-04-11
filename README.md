@@ -16,7 +16,6 @@
 
 </div>
 
----
 
 ## 🌌 What is Orion Arc?
 
@@ -27,7 +26,6 @@ While most trackers give you a boring list, Orion Arc renders launches with a **
 <br>
 <img src="assets/Screenshots/screenshot1.jpeg" alt="Dashboard" width="100%">
 
----
 
 ## 💡 Core Idea and Vision
 
@@ -40,7 +38,6 @@ The vision for Orion Arc is to be the dashboard that makes space feel **visceral
 <br>
 <img src="assets/Screenshots/screenshot5.jpeg" alt="Dark Mode UI" width="100%">
 
----
 
 ## ⚡ Features
 
@@ -77,19 +74,17 @@ The vision for Orion Arc is to be the dashboard that makes space feel **visceral
 <br>
 <img src="assets/Screenshots/screenshot3.jpeg" alt="Telemetry HUD" width="100%">
 
----
 
 ## 🛠️ Tech Stack
 
 | Technology | Role |
 |---|---|
 | **HTML & CSS** | Layouts, semantic styling, advanced 3D keyframe transforms, and ops-style theming |
-| **Vanilla JavaScript** | Core logic, synthetic data mapping, API debouncing, and Intersection Observers |
+| **JavaScript** | Core logic, synthetic data mapping, API debouncing, and Intersection Observers |
 | **Three.js & Spline** | Render pipeline for the interactive 3D Spatial Globe and embedded background `.splinecode` environments |
 | **Canvas API** | Zero-dependency Orbital Arc Visualiser — drawing orbit rings, and animated trajectories |
 | **Fetch API** | `Promise.all` orchestration synthesizing parallel REST loads into a unified relational state object |
 
----
 
 ## 📡 APIs
 
@@ -106,7 +101,6 @@ Auth     : None — no API key required
 | `GET /launchpads` | Launch site coordinates → orbital map pin placement |
 | `GET /payloads` | Payload mass and target orbit type |
 
----
 
 ## 🚀 Getting Started
 
@@ -123,7 +117,6 @@ npx serve -l 3000
 ```
 Open `http://localhost:3000` in your browser.
 
----
 
 ## 🎨 Design Notes
 
@@ -133,11 +126,9 @@ Open `http://localhost:3000` in your browser.
 
 **Ops aesthetic.** Monospace fonts for telemetry readouts, thin borders, status badges, radial gradients. Built to feel like a real operations center.
 
----
 
 <div align="center">
 
-*Orion Arc — built purely with HTML · CSS · Vanilla JavaScript*
-*Data from the SpaceX API*
+*Orion Arc — built purely with HTML · CSS · JavaScript*
 
 </div>
