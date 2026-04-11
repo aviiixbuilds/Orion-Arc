@@ -55,12 +55,12 @@ The vision for Orion Arc is to be the dashboard that makes space feel **visceral
 
 | Feature | Description |
 |---|---|
-| ⌨️ **Debounced Search** | Search fires only after user stops typing — no redundant filtering computations |
-| 💀 **Loading Indicators** | Placeholder skeleton cards animate while data is fetching |
-| 💾 **Local/State Management** | Favorites and theme preference survive page reload safely |
+| ⌨️ **Debouncing** | Search logic limits how frequently the filter algorithm is executed, firing only after keystrokes stop |
+| 📄 **Pagination** | Efficiently divides large sets of API data into smaller, manageable launch feed pages |
+| 💀 **Loading Indicators** | Provides visual feedback (Skeleton Cards and boot overlays) while data is being fetched |
+| 💾 **Local Storage** | Allows storing data in the browser for persistence (saving favorites and theme defaults) |
+| 🌀 **Throttling & Physics** | Ensures functions run at a controlled rate over time to handle scroll momentum and hardware acceleration |
 | 🚀 **High-Res Canvas Text** | Uses 1024x256 custom canvases with LinearFiltering for crystal clear 3D globe fonts |
-| 🌀 **Scroll-Velocity Physics** | Math interpolation algorithm ties the stats marquee acceleration directly to user `scrollY` momentum |
-| ⚡ **Hardware Acceleration** | Scroll-spy, 60fps animations, using Intersection Observer algorithms |
 | 🧹 **Lean Codebase** | Free from unnecessary code bloat, strictly maintained pure Vanilla engineering |
 
 ---
