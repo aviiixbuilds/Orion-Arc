@@ -6,7 +6,7 @@
 
 [![Status](https://img.shields.io/badge/status-completed-brightgreen?style=flat-square)](#)
 [![API](https://img.shields.io/badge/API-SpaceX-blue?style=flat-square)](https://api.spacexdata.com/v4/)
-[![Tech](https://img.shields.io/badge/built%20with-HTML%20%7C%20CSS%20%7C%20JavaScript%20%7C%20Three.js%20%7C%20UI%2FUX-black?style=flat-square)](#)
+[![Tech](https://img.shields.io/badge/built%20with-HTML%20%7C%20CSS%20%7C%20JavaScript%20%7C%20Three.js%20%7C%20UI%2FUX-blueviolet?style=flat-square)](#)
 
 <br/>
 
