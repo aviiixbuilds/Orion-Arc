@@ -660,6 +660,15 @@ function initGlobe(container, launches) {
         }
         globeRenderer.render(globeScene, globeCamera); 
     }
+    // Responsive resize handler for globe
+    const globeResizeHandler = () => {
+        if (!globeRenderer || !globeCamera || !container) return;
+        globeCamera.aspect = container.clientWidth / container.clientHeight;
+        globeCamera.updateProjectionMatrix();
+        globeRenderer.setSize(container.clientWidth, container.clientHeight);
+    };
+    window.addEventListener('resize', globeResizeHandler);
+
     loop();
 }
 function filterBySearch(launches, query) {
@@ -730,6 +739,50 @@ document.addEventListener("DOMContentLoaded", async () => {
     const startTime = Date.now();
     initStatsMarquee();
     initTimelineTypewriter();
+
+    // --- Hamburger menu for mobile ---
+    const hamburger = $("nav-hamburger");
+    const drawer = $("nav-drawer");
+    if (hamburger && drawer) {
+        hamburger.addEventListener('click', () => {
+            drawer.classList.toggle('open');
+        });
+        drawer.querySelectorAll('.drawer-link').forEach(link => {
+            link.addEventListener('click', () => drawer.classList.remove('open'));
+        });
+    }
+
+    // --- Preload all critical images during cube loader ---
+    const preloadImages = [
+        'assets/logo.png',
+        'assets/earth.png',
+        'assets/Spaceship.png',
+        'assets/location.png',
+        'assets/callender.png',
+        'assets/content.png',
+        'assets/scan-small.jpg',
+        'assets/orbital-bg.jpg',
+        'assets/Background-Satellite.jpg',
+        'assets/launch-bg.jpg',
+        'assets/outer-space-background-small.jpg',
+        'assets/Satellites/AdobeStock_594956182.jpg.optimal.jpg',
+        'assets/Satellites/Debris_objects_-_mostly_debris_-_in_low_Earth_orbit_LEO_-_view_over_the_equator-1024x786.jpg',
+        'assets/Satellites/Earth-from-space-1-64e9a7c.jpg',
+        'assets/Satellites/Galileo and blue background.jpg',
+        'assets/Satellites/MIT-Global-Broadband-01-PRESS.jpg',
+        'assets/Satellites/Webp.net-resizeimage-51-1200x800.jpg',
+        'assets/Satellites/different-types-of-satellites-jpg.webp',
+        'assets/Satellites/gw-nasa-earth-science-mission-satellite.jpg'
+    ];
+    const imagePreloadPromise = Promise.all(
+        preloadImages.map(src => new Promise(resolve => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = resolve; // Don't block on failure
+            img.src = src;
+        }))
+    );
+
     const initPromise = new Promise(resolve => {
         setTimeout(async () => {
             await init();
@@ -737,7 +790,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }, 300);
     });
     const ensureTwoSeconds = new Promise(resolve => setTimeout(resolve, 2000));
-    await Promise.all([initPromise, ensureTwoSeconds]);
+    await Promise.all([initPromise, ensureTwoSeconds, imagePreloadPromise]);
     if (loader) {
         loader.classList.add("fade-out");
         setTimeout(() => loader.remove(), 1000);
