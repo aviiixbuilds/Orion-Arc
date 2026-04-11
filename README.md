@@ -65,6 +65,16 @@ The vision for Orion Arc is to be the dashboard that makes space feel **visceral
 
 ---
 
+## 📸 Screenshots
+
+<img src="assets/Screenshots/screenshot1.jpeg" alt="Screenshot 1" width="100%">
+<img src="assets/Screenshots/screenshot2.jpeg" alt="Screenshot 2" width="100%">
+<img src="assets/Screenshots/screenshot3.jpeg" alt="Screenshot 3" width="100%">
+<img src="assets/Screenshots/screenshot4.jpeg" alt="Screenshot 4" width="100%">
+<img src="assets/Screenshots/screenshot5.jpeg" alt="Screenshot 5" width="100%">
+
+---
+
 ## 🛠️ Tech Stack
 
 | Technology | Role |
