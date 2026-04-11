@@ -38,6 +38,84 @@
   --text-muted: #8fa5b5;
   --text-accent: #0277bd;
 }
+[data-theme="light"] .marquee-item.text-outline {
+  -webkit-text-stroke: 2px rgba(0, 0, 0, 0.15);
+}
+[data-theme="light"] .page-btn {
+  background: rgba(224, 234, 244, 0.85);
+  border-color: var(--border-bright);
+  color: var(--text-primary);
+}
+[data-theme="light"] .page-num {
+  background: rgba(224, 234, 244, 0.85);
+  border-color: var(--border-bright);
+  color: var(--text-secondary);
+}
+[data-theme="light"] .launches-section::before {
+  background: linear-gradient(rgba(240, 244, 248, 0.75), rgba(240, 244, 248, 0.85)), url('assets/launch-bg.jpg');
+  background-size: cover;
+  background-position: center;
+}
+[data-theme="light"] .launches-section {
+  border-color: var(--border-bright);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+[data-theme="light"] .globe-container {
+  background-image: radial-gradient(circle at center, transparent 15%, rgba(240, 244, 248, 0.7) 50%, rgba(228, 234, 240, 0.9) 80%), url('assets/outer-space-background.jpg');
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.1);
+}
+[data-theme="light"] .globe-tip {
+  background: rgba(240, 244, 248, 0.85);
+  color: var(--text-secondary);
+}
+[data-theme="light"] .timeline-visual-container {
+  background: #1a1a2e;
+}
+[data-theme="light"] .orbital-section {
+  background: linear-gradient(rgba(240, 244, 248, 0.7), rgba(240, 244, 248, 0.7)), url('assets/orbital-bg.jpg');
+  background-size: cover;
+  background-position: center;
+}
+[data-theme="light"] .orbital-mission-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--border-bright);
+}
+[data-theme="light"] .orbital-mission-name {
+  color: var(--text-primary);
+  text-shadow: none;
+}
+[data-theme="light"] .orbital-counter {
+  color: var(--text-primary);
+  text-shadow: none;
+}
+[data-theme="light"] .orbital-controls {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: var(--border);
+}
+[data-theme="light"] .orbital-nav-btn,
+[data-theme="light"] .orbital-auto-btn {
+  color: var(--text-primary);
+  border-color: var(--border-bright);
+  background: rgba(255, 255, 255, 0.6);
+  text-shadow: none;
+}
+[data-theme="light"] .orbital-legend {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: var(--border);
+}
+[data-theme="light"] .stats-marquee-wrapper {
+  background: var(--bg-card);
+}
+[data-theme="light"] .footer {
+  color: var(--text-primary);
+}
+[data-theme="light"] .neon-bar-val {
+  color: var(--text-primary);
+  text-shadow: none;
+}
+[data-theme="light"] .neon-bar-year {
+  color: #e8edf2 !important;
+}
 *,
 *::before,
 *::after {
