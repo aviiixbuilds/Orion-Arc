@@ -4,10 +4,9 @@
 
 ### Track real-world rocket launches with cinematic visualizations
 
-[![Status](https://img.shields.io/badge/status-in%20development-orange?style=flat-square)](#)
+[![Status](https://img.shields.io/badge/status-completed-brightgreen?style=flat-square)](#)
 [![API](https://img.shields.io/badge/API-SpaceX-blue?style=flat-square)](https://api.spacexdata.com/v4/)
-[![Tech](https://img.shields.io/badge/built%20with-HTML%20%7C%20CSS%20%7C%20JS-black?style=flat-square)](#)
-[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](#)
+[![Tech](https://img.shields.io/badge/built%20with-HTML%20%7C%20CSS%20%7C%20JavaScript%20%7C%20Three.js%20%7C%20UI%2FUX-black?style=flat-square)](#)
 
 <br/>
 
