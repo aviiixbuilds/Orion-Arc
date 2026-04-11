@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,58 +10,106 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;600;700;800;900&display=swap"
+    rel="stylesheet" />
 
-  <link rel="stylesheet" href="style.css?v=1712411520" />
+  <link rel="stylesheet" href="style.css?v=30" />
   <style>
-    .loading-sub { display: flex !important; align-items: center !important; gap: 12px !important; margin-top: 15px !important; font-size: 0.7rem !important; font-weight: 800 !important; color: #00e5ff !important; clear: both !important; }
-    .diag-particle-group { display: flex !important; gap: 8px !important; align-items: center !important; margin-left: 8px !important; }
+    .loading-sub {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      margin-top: 15px !important;
+      font-size: 0.7rem !important;
+      font-weight: 800 !important;
+      color: #00e5ff !important;
+      clear: both !important;
+    }
+
+    .diag-particle-group {
+      display: flex !important;
+      gap: 8px !important;
+      align-items: center !important;
+      margin-left: 8px !important;
+    }
+
     .diag-particle {
-      width: 6px !important; height: 6px !important;
+      width: 6px !important;
+      height: 6px !important;
       background: #00e5ff !important;
       border-radius: 0 !important;
       border: none !important;
       outline: none !important;
       animation: diag-pulse 1s ease-in-out infinite !important;
     }
-    .diag-particle:nth-child(2) { animation-delay: 0.3s !important; }
-    .diag-particle:nth-child(3) { animation-delay: 0.6s !important; }
+
+    .diag-particle:nth-child(2) {
+      animation-delay: 0.3s !important;
+    }
+
+    .diag-particle:nth-child(3) {
+      animation-delay: 0.6s !important;
+    }
+
     @keyframes diag-pulse {
-      0%, 100% { transform: rotate(45deg) scale(1);   opacity: 0.5; }
-      50%       { transform: rotate(45deg) scale(1.5); opacity: 1;   }
+
+      0%,
+      100% {
+        transform: rotate(45deg) scale(1);
+        opacity: 0.5;
+      }
+
+      50% {
+        transform: rotate(45deg) scale(1.5);
+        opacity: 1;
+      }
     }
   </style>
 
 </head>
 
 <body data-theme="dark">
-    <!-- CUBE LOADER OVERLAY -->
-    <div id="cube-loader-overlay" class="cube-loader-overlay">
-      <div class="cube-perspective">
-        <div class="cube-container">
-          <div class="cube-core"></div>
-          
-          <div class="side-wrapper front"><div class="loader-face cyan"></div></div>
-          <div class="side-wrapper back"><div class="loader-face cyan"></div></div>
-          <div class="side-wrapper right"><div class="loader-face purple"></div></div>
-          <div class="side-wrapper left"><div class="loader-face purple"></div></div>
-          <div class="side-wrapper top"><div class="loader-face indigo"></div></div>
-          <div class="side-wrapper bottom"><div class="loader-face indigo"></div></div>
-          
-          <div class="cube-floor-shadow"></div>
+  <!-- CUBE LOADER OVERLAY -->
+  <div id="cube-loader-overlay" class="cube-loader-overlay">
+    <div class="cube-perspective">
+      <div class="cube-container">
+        <div class="cube-core"></div>
+
+        <div class="side-wrapper front">
+          <div class="loader-face cyan"></div>
+        </div>
+        <div class="side-wrapper back">
+          <div class="loader-face cyan"></div>
+        </div>
+        <div class="side-wrapper right">
+          <div class="loader-face purple"></div>
+        </div>
+        <div class="side-wrapper left">
+          <div class="loader-face purple"></div>
+        </div>
+        <div class="side-wrapper top">
+          <div class="loader-face indigo"></div>
+        </div>
+        <div class="side-wrapper bottom">
+          <div class="loader-face indigo"></div>
         </div>
 
-        <div class="loader-text-wrapper">
-          <h3 class="loader-main-text">LOADING ORION ARC</h3>
-          <p class="loader-sub-text">PREPARING YOUR EXPERIENCE, PLEASE WAIT...</p>
-        </div>
+        <div class="cube-floor-shadow"></div>
+      </div>
+
+      <div class="loader-text-wrapper">
+        <h3 class="loader-main-text">LOADING ORION ARC</h3>
+        <p class="loader-sub-text">PREPARING YOUR EXPERIENCE, PLEASE WAIT...</p>
       </div>
     </div>
+  </div>
 
-    <nav class="navbar" id="navbar">
+  <nav class="navbar" id="navbar">
     <div class="nav-left">
       <div class="nav-logo">
-        <img src="assets/logo.png" alt="Orion Arc Logo" style="height: 24px; width: auto; filter: brightness(1.2) drop-shadow(0 0 6px rgba(79, 195, 247, 0.4));" />
+        <img src="assets/logo.png" alt="Orion Arc Logo"
+          style="height: 24px; width: auto; filter: brightness(1.2) drop-shadow(0 0 6px rgba(79, 195, 247, 0.4));" />
         <span class="logo-text">ORION ARC</span>
       </div>
       <div class="nav-status">
@@ -71,9 +120,10 @@
 
     <div class="nav-center">
       <nav class="nav-links">
+        <a href="#globe" class="nav-link" data-section="globe">STATIONS</a>
         <a href="#launches" class="nav-link active" data-section="launches">LAUNCHES</a>
         <a href="#orbital" class="nav-link" data-section="orbital">ORBITAL</a>
-        <a href="#agencies" class="nav-link" data-section="agencies">AGENCIES</a>
+        <a href="#timeline" class="nav-link" data-section="timeline">TIMELINE</a>
         <a href="#favorites" class="nav-link" data-section="favorites">FAVORITES</a>
       </nav>
     </div>
@@ -89,60 +139,70 @@
     </div>
   </nav>
 
-    <div class="nav-drawer" id="nav-drawer">
+  <div class="nav-drawer" id="nav-drawer">
+    <a href="#globe" class="drawer-link">STATIONS</a>
     <a href="#launches" class="drawer-link">LAUNCHES</a>
     <a href="#orbital" class="drawer-link">ORBITAL</a>
-    <a href="#agencies" class="drawer-link">AGENCIES</a>
+    <a href="#timeline" class="drawer-link">TIMELINE</a>
     <a href="#favorites" class="drawer-link">FAVORITES</a>
   </div>
 
-    <section class="hero-scroll" id="hero-scroll">
+  <section class="hero-scroll" id="hero-scroll">
     <div class="hero-sticky-container">
       <video id="hero-video" class="hero-bg-video" src="assets/hero-bg.mp4" muted playsinline preload="auto"></video>
       <div class="hero-overlay"></div>
-      <p class="hero-scroll-hint">Most space apps treat launches as rows in a database.<br>Orion Arc treats them as events on a planet.</p>
-      
+      <p class="hero-scroll-hint">Most space apps treat launches as rows in a database.<br>Orion Arc treats them as
+        events on a planet.</p>
+
       <div class="reveal-text-container">
         <h1 class="reveal-text" id="reveal-text" aria-label="ORION ARC" style="transform: scaleY(1.4);">
           <span class="letter-wrap spring-in" data-index="0">
             <span class="letter-base">O</span>
-            <span class="letter-hover" style="background-image: url('assets/Satellites/AdobeStock_594956182.jpg.optimal.jpg');">O</span>
+            <span class="letter-hover"
+              style="background-image: url('assets/Satellites/AdobeStock_594956182.jpg.optimal.jpg');">O</span>
             <span class="letter-overlay">O</span>
           </span>
           <span class="letter-wrap spring-in" data-index="1">
             <span class="letter-base">R</span>
-            <span class="letter-hover" style="background-image: url('assets/Satellites/Debris_objects_-_mostly_debris_-_in_low_Earth_orbit_LEO_-_view_over_the_equator-1024x786.jpg');">R</span>
+            <span class="letter-hover"
+              style="background-image: url('assets/Satellites/Debris_objects_-_mostly_debris_-_in_low_Earth_orbit_LEO_-_view_over_the_equator-1024x786.jpg');">R</span>
             <span class="letter-overlay">R</span>
           </span>
           <span class="letter-wrap spring-in" data-index="2">
             <span class="letter-base">I</span>
-            <span class="letter-hover" style="background-image: url('assets/Satellites/Earth-from-space-1-64e9a7c.jpg');">I</span>
+            <span class="letter-hover"
+              style="background-image: url('assets/Satellites/Earth-from-space-1-64e9a7c.jpg');">I</span>
             <span class="letter-overlay">I</span>
           </span>
           <span class="letter-wrap spring-in" data-index="3">
             <span class="letter-base">O</span>
-            <span class="letter-hover" style="background-image: url('assets/Satellites/Galileo and blue background.jpg');">O</span>
+            <span class="letter-hover"
+              style="background-image: url('assets/Satellites/Galileo and blue background.jpg');">O</span>
             <span class="letter-overlay">O</span>
           </span>
           <span class="letter-wrap spring-in" data-index="4">
             <span class="letter-base">N</span>
-            <span class="letter-hover" style="background-image: url('assets/Satellites/MIT-Global-Broadband-01-PRESS.jpg');">N</span>
+            <span class="letter-hover"
+              style="background-image: url('assets/Satellites/MIT-Global-Broadband-01-PRESS.jpg');">N</span>
             <span class="letter-overlay">N</span>
           </span>
           <span style="display:inline-block; width:0.3em;">&nbsp;</span>
           <span class="letter-wrap spring-in" data-index="5">
             <span class="letter-base">A</span>
-            <span class="letter-hover" style="background-image: url('assets/Satellites/Webp.net-resizeimage-51-1200x800.jpg');">A</span>
+            <span class="letter-hover"
+              style="background-image: url('assets/Satellites/Webp.net-resizeimage-51-1200x800.jpg');">A</span>
             <span class="letter-overlay">A</span>
           </span>
           <span class="letter-wrap spring-in" data-index="6">
             <span class="letter-base">R</span>
-            <span class="letter-hover" style="background-image: url('assets/Satellites/different-types-of-satellites-jpg.webp');">R</span>
+            <span class="letter-hover"
+              style="background-image: url('assets/Satellites/different-types-of-satellites-jpg.webp');">R</span>
             <span class="letter-overlay">R</span>
           </span>
           <span class="letter-wrap spring-in" data-index="7">
             <span class="letter-base">C</span>
-            <span class="letter-hover" style="background-image: url('assets/Satellites/gw-nasa-earth-science-mission-satellite.jpg');">C</span>
+            <span class="letter-hover"
+              style="background-image: url('assets/Satellites/gw-nasa-earth-science-mission-satellite.jpg');">C</span>
             <span class="letter-overlay">C</span>
           </span>
         </h1>
@@ -153,40 +213,46 @@
   <section class="stats-marquee-wrapper" id="stats-bar">
     <div class="stats-marquee-row" id="marquee-row-1">
       <div class="stats-marquee-track">
-        <span class="marquee-item">205 TOTAL LAUNCHES        |        97.3% SUCCESS RATE        |        18 UPCOMING        |        23 AGENCIES        |        3 ROCKET TYPES        |        </span>
-        <span class="marquee-item" aria-hidden="true">205 TOTAL LAUNCHES        |        97.3% SUCCESS RATE        |        18 UPCOMING        |        23 AGENCIES        |        3 ROCKET TYPES        |        </span>
-        <span class="marquee-item" aria-hidden="true">205 TOTAL LAUNCHES        |        97.3% SUCCESS RATE        |        18 UPCOMING        |        23 AGENCIES        |        3 ROCKET TYPES        |        </span>
+        <span class="marquee-item">205 TOTAL LAUNCHES | 97.3% SUCCESS RATE | 18 UPCOMING | 23 AGENCIES | 3 ROCKET TYPES
+          | </span>
+        <span class="marquee-item" aria-hidden="true">205 TOTAL LAUNCHES | 97.3% SUCCESS RATE | 18 UPCOMING | 23
+          AGENCIES | 3 ROCKET TYPES | </span>
+        <span class="marquee-item" aria-hidden="true">205 TOTAL LAUNCHES | 97.3% SUCCESS RATE | 18 UPCOMING | 23
+          AGENCIES | 3 ROCKET TYPES | </span>
       </div>
     </div>
     <div class="stats-marquee-row" id="marquee-row-2">
       <div class="stats-marquee-track">
-        <span class="marquee-item">205 TOTAL LAUNCHES        |        97.3% SUCCESS RATE        |        18 UPCOMING        |        23 AGENCIES        |        3 ROCKET TYPES        |        </span>
-        <span class="marquee-item" aria-hidden="true">205 TOTAL LAUNCHES        |        97.3% SUCCESS RATE        |        18 UPCOMING        |        23 AGENCIES        |        3 ROCKET TYPES        |        </span>
-        <span class="marquee-item" aria-hidden="true">205 TOTAL LAUNCHES        |        97.3% SUCCESS RATE        |        18 UPCOMING        |        23 AGENCIES        |        3 ROCKET TYPES        |        </span>
+        <span class="marquee-item">205 TOTAL LAUNCHES | 97.3% SUCCESS RATE | 18 UPCOMING | 23 AGENCIES | 3 ROCKET TYPES
+          | </span>
+        <span class="marquee-item" aria-hidden="true">205 TOTAL LAUNCHES | 97.3% SUCCESS RATE | 18 UPCOMING | 23
+          AGENCIES | 3 ROCKET TYPES | </span>
+        <span class="marquee-item" aria-hidden="true">205 TOTAL LAUNCHES | 97.3% SUCCESS RATE | 18 UPCOMING | 23
+          AGENCIES | 3 ROCKET TYPES | </span>
       </div>
     </div>
   </section>
 
-    <section class="globe-section" id="globe">
-      <div class="section-header">
-        <h2 class="section-title">
-          <span class="title-accent">01</span> SPACE STATIONS & PADS
-        </h2>
-        <p class="section-subtitle">Real-time coordinates of historic sites</p>
+  <section class="globe-section" id="globe">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="title-accent">01</span> SPACE STATIONS & PADS
+      </h2>
+      <p class="section-subtitle">Real-time coordinates of historic sites</p>
+    </div>
+    <div class="globe-container">
+      <div id="globe-canvas-container"></div>
+      <div class="globe-overlay">
+        <div class="globe-tip">● DRAG TO ROTATE · SCROLL TO ZOOM</div>
       </div>
-      <div class="globe-container">
-        <div id="globe-canvas-container"></div>
-        <div class="globe-overlay">
-          <div class="globe-tip">● DRAG TO ROTATE · SCROLL TO ZOOM</div>
-        </div>
-      </div>
-    </section>
+    </div>
+  </section>
 
-    <main class="main-wrapper">
+  <main class="main-wrapper">
 
 
 
-        <section class="launches-section" id="launches">
+    <section class="launches-section" id="launches">
       <div class="section-header">
         <h2 class="section-title">
           <span class="title-accent">02</span> ALL LAUNCHES
@@ -198,13 +264,8 @@
 
         <div class="search-wrapper">
           <span class="search-icon">⌕</span>
-          <input
-            type="text"
-            class="search-input"
-            id="search-input"
-            placeholder="Search mission, rocket, agency..."
-            autocomplete="off"
-          />
+          <input type="text" class="search-input" id="search-input" placeholder="Search mission, rocket, agency..."
+            autocomplete="off" />
           <button class="search-clear" id="search-clear" aria-label="Clear search">✕</button>
         </div>
 
@@ -243,25 +304,49 @@
 
       </div>
 
-            <div class="active-filters" id="active-filters"></div>
+      <div class="active-filters" id="active-filters"></div>
 
-            <div class="launches-grid" id="launches-grid">
-                <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
-        <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
-        <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
-        <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
-        <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
-        <div class="launch-card skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>
+      <div class="launches-grid" id="launches-grid">
+        <div class="launch-card skeleton-card">
+          <div class="skeleton skeleton-img"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line short"></div>
+        </div>
+        <div class="launch-card skeleton-card">
+          <div class="skeleton skeleton-img"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line short"></div>
+        </div>
+        <div class="launch-card skeleton-card">
+          <div class="skeleton skeleton-img"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line short"></div>
+        </div>
+        <div class="launch-card skeleton-card">
+          <div class="skeleton skeleton-img"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line short"></div>
+        </div>
+        <div class="launch-card skeleton-card">
+          <div class="skeleton skeleton-img"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line short"></div>
+        </div>
+        <div class="launch-card skeleton-card">
+          <div class="skeleton skeleton-img"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line short"></div>
+        </div>
       </div>
 
-            <div class="empty-state hidden" id="empty-state">
+      <div class="empty-state hidden" id="empty-state">
         <span class="empty-icon">⊘</span>
         <p class="empty-title">No missions found</p>
         <p class="empty-sub">Try adjusting your search or filters</p>
         <button class="btn-ghost" id="empty-reset">RESET FILTERS</button>
       </div>
 
-            <div class="pagination" id="pagination">
+      <div class="pagination" id="pagination">
         <button class="page-btn" id="page-prev" disabled>← PREV</button>
         <div class="page-numbers" id="page-numbers"></div>
         <button class="page-btn" id="page-next">NEXT →</button>
@@ -269,7 +354,7 @@
 
     </section>
 
-        <section class="orbital-section" id="orbital">
+    <section class="orbital-section" id="orbital">
       <div class="section-header">
         <h2 class="section-title">
           <span class="title-accent">03</span> ORBITAL MAP
@@ -310,30 +395,50 @@
 
           <div class="orbital-legend">
             <div class="orbital-legend-title">ORBIT BANDS</div>
-            <div class="orbital-legend-item"><span class="orbital-legend-dot" style="background:#4fc3f7"></span>LEO · Low Earth Orbit</div>
-            <div class="orbital-legend-item"><span class="orbital-legend-dot" style="background:#81c784"></span>ISS · Space Station</div>
-            <div class="orbital-legend-item"><span class="orbital-legend-dot" style="background:#ffb74d"></span>SSO · Sun-Sync Orbit</div>
-            <div class="orbital-legend-item"><span class="orbital-legend-dot" style="background:#ce93d8"></span>GEO · Geostationary</div>
-            <div class="orbital-legend-item"><span class="orbital-legend-dot" style="background:#ef9a9a"></span>POLAR / OTHER</div>
+            <div class="orbital-legend-item">
+              <span class="orbital-legend-dot" style="background:#4fc3f7"></span>
+              <span class="orb-code">LEO</span><span class="orb-sep">·</span>
+              <span class="orb-desc">Low Earth Orbit</span>
+            </div>
+            <div class="orbital-legend-item">
+              <span class="orbital-legend-dot" style="background:#81c784"></span>
+              <span class="orb-code">ISS</span><span class="orb-sep">·</span>
+              <span class="orb-desc">Space Station</span>
+            </div>
+            <div class="orbital-legend-item">
+              <span class="orbital-legend-dot" style="background:#ffb74d"></span>
+              <span class="orb-code">SSO</span><span class="orb-sep">·</span>
+              <span class="orb-desc">Sun-Sync Orbit</span>
+            </div>
+            <div class="orbital-legend-item">
+              <span class="orbital-legend-dot" style="background:#ce93d8"></span>
+              <span class="orb-code">GEO</span><span class="orb-sep">·</span>
+              <span class="orb-desc">Geostationary</span>
+            </div>
+            <div class="orbital-legend-item">
+              <span class="orbital-legend-dot" style="background:#ef9a9a"></span>
+              <span class="orb-code">POLAR</span><span class="orb-sep">·</span>
+              <span class="orb-desc">Other</span>
+            </div>
           </div>
 
           <div class="orbital-controls">
             <div class="orbital-counter">
-              <span class="orbital-counter-label">MISSION</span>
-              <span class="orbital-counter-val"><span id="orbital-idx">1</span> / <span id="orbital-total">—</span></span>
+              <span class="orb-counter-prefix">MISSION</span><span id="orbital-idx">1</span> / <span
+                id="orbital-total">—</span>
             </div>
-            <div class="orbital-btn-row">
+            <div class="orbital-btn-strip">
               <button class="orbital-nav-btn" id="orbital-prev">← PREV</button>
               <button class="orbital-nav-btn" id="orbital-next">NEXT →</button>
+              <button class="orbital-auto-btn" id="orbital-auto">⏸ PAUSE</button>
             </div>
-            <button class="orbital-auto-btn" id="orbital-auto">⏸ PAUSE</button>
           </div>
         </div>
 
         <!-- Canvas -->
         <div class="orbital-canvas-wrap">
           <canvas id="orbital-canvas"></canvas>
-          <div class="orbital-canvas-label">EARTH / EQUATORIAL VIEW · NOT TO SCALE</div>
+
         </div>
 
       </div>
@@ -363,22 +468,11 @@
       </script>
     </section>
 
-        <section class="agencies-section" id="agencies">
-      <div class="section-header">
-        <h2 class="section-title">
-          <span class="title-accent">05</span> AGENCIES
-        </h2>
-        <p class="section-subtitle">Breakdown by space agency</p>
-      </div>
-      <div class="agencies-grid" id="agencies-grid">
-        <!-- Rendered dynamically by render.js -->
-      </div>
-    </section>
 
-        <section class="favorites-section" id="favorites">
+    <section class="favorites-section" id="favorites">
       <div class="section-header">
         <h2 class="section-title">
-          <span class="title-accent">06</span> FAVORITES
+          <span class="title-accent">05</span> FAVORITES
         </h2>
         <span class="fav-count" id="fav-count">0 saved</span>
       </div>
@@ -394,22 +488,24 @@
 
   </main>
 
-    <div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal-overlay hidden" id="modal-overlay">
     <div class="modal hud-modal" id="mission-modal" role="dialog" aria-modal="true">
-      
+
       <!-- Top Status Bar -->
       <div class="hud-top-bar">
         <div class="hud-top-info">
-          <div class="info-pair"><span class="key">Mission:</span><span class="val" id="modal-mission-name">MISSION_UNK</span></div>
+          <div class="info-pair"><span class="key">Mission:</span><span class="val"
+              id="modal-mission-name">MISSION_UNK</span></div>
           <div class="info-pair"><span class="key">Status:</span><span class="val" id="modal-badge">STABLE</span></div>
-          <div class="info-pair location-highlight"><span class="key">Launch Site:</span><span class="val" id="modal-site">FACILITY_A</span></div>
+          <div class="info-pair location-highlight"><span class="key">Launch Site:</span><span class="val"
+              id="modal-site">FACILITY_A</span></div>
         </div>
 
         <button class="hud-close" id="modal-close">✕</button>
       </div>
 
       <div class="hud-main-layout">
-        
+
         <!-- Row 1 Left: Loading / Visual -->
         <div class="hud-panel panel-loading">
           <div class="loading-val">84%</div>
@@ -432,83 +528,97 @@
 
 
         <div class="hud-panel panel-map">
-            <div class="panel-header">SCAN ACTIVE</div>
-            <div class="hud-map-box">
-              <img src="assets/scan.jpg" class="scan-img" />
-              <div class="scan-line"></div>
-            </div>
-            <div class="hud-mini-stats">
-              <div class="vital-item"><span class="vital-key">SENSOR</span><span class="vital-val">OPTICAL</span></div>
-            </div>
+          <div class="panel-header">SCAN ACTIVE</div>
+          <div class="hud-map-box">
+            <img src="assets/scan.jpg" class="scan-img" />
+            <div class="scan-line"></div>
+          </div>
+          <div class="hud-mini-stats">
+            <div class="vital-item"><span class="vital-key">SENSOR</span><span class="vital-val">OPTICAL</span></div>
+          </div>
         </div>
 
 
         <!-- Row 1 Right: Main Telemetry -->
         <div class="hud-panel panel-vitals">
-            <div class="panel-header"> [ TELEMETRY ] </div>
-            <div class="vitals-grid">
-                <div class="vital-item"><span class="vital-key">VEHICLE</span><span class="vital-val" id="modal-rocket">—</span></div>
-                <div class="vital-item"><span class="vital-key">TIMESTAMP</span><span class="vital-val" id="modal-date">—</span></div>
-                <div class="vital-item"><span class="vital-key">TRAJECTORY</span><span class="vital-val" id="modal-orbit">—</span></div>
-                <div class="vital-item"><span class="vital-key">PAYLOAD_MASS</span><span class="vital-val" id="modal-mass">—</span></div>
-                <div class="vital-item"><span class="vital-key">MANUFACTURER</span><span class="vital-val" id="modal-manufacturer">—</span></div>
-                <div class="vital-item"><span class="vital-key">NATIONALITY</span><span class="vital-val" id="modal-nationality">—</span></div>
-                <div class="vital-item"><span class="vital-key">REGION</span><span class="vital-val" id="modal-region">—</span></div>
-                <div class="vital-item"><span class="vital-key">FLIGHT_ID</span><span class="vital-val" id="modal-flight">—</span></div>
-            </div>
+          <div class="panel-header"> [ TELEMETRY ] </div>
+          <div class="vitals-grid">
+            <div class="vital-item"><span class="vital-key">VEHICLE</span><span class="vital-val"
+                id="modal-rocket">—</span></div>
+            <div class="vital-item"><span class="vital-key">TIMESTAMP</span><span class="vital-val"
+                id="modal-date">—</span></div>
+            <div class="vital-item"><span class="vital-key">TRAJECTORY</span><span class="vital-val"
+                id="modal-orbit">—</span></div>
+            <div class="vital-item"><span class="vital-key">PAYLOAD_MASS</span><span class="vital-val"
+                id="modal-mass">—</span></div>
+            <div class="vital-item"><span class="vital-key">MANUFACTURER</span><span class="vital-val"
+                id="modal-manufacturer">—</span></div>
+            <div class="vital-item"><span class="vital-key">NATIONALITY</span><span class="vital-val"
+                id="modal-nationality">—</span></div>
+            <div class="vital-item"><span class="vital-key">REGION</span><span class="vital-val"
+                id="modal-region">—</span></div>
+            <div class="vital-item"><span class="vital-key">FLIGHT_ID</span><span class="vital-val"
+                id="modal-flight">—</span></div>
+          </div>
         </div>
 
 
         <!-- Row 2 Left: Objective -->
         <div class="hud-panel panel-description">
-            <div class="hud-module-title">> OBJECTIVE Briefing <</div>
-            <div id="modal-details" class="hud-description-text">
-                Analyzing re-entry profile...
-            </div>
+          <div class="panel-header"> [ OBJECTIVE BRIEFING ] </div>
+          <div id="modal-details" class="hud-description-text">
+            Analyzing re-entry profile...
+          </div>
         </div>
 
         <!-- Row 2 Middle: Core Technical -->
         <div class="hud-panel panel-core">
-            <div class="panel-header"> [ CORE_HARDWARE ] </div>
-            <div class="vitals-grid">
-                <div class="vital-item"><span class="vital-key">SERIAL</span><span class="vital-val" id="modal-core-serial">—</span></div>
-                <div class="vital-item"><span class="vital-key">REUSE_COUNT</span><span class="vital-val" id="modal-reuse">—</span></div>
-                <div class="vital-item"><span class="vital-key">LANDING_INTENT</span><span class="vital-val" id="modal-landing">—</span></div>
-            </div>
+          <div class="panel-header"> [ CORE_HARDWARE ] </div>
+          <div class="vitals-grid">
+            <div class="vital-item"><span class="vital-key">SERIAL</span><span class="vital-val"
+                id="modal-core-serial">—</span></div>
+            <div class="vital-item"><span class="vital-key">REUSE_COUNT</span><span class="vital-val"
+                id="modal-reuse">—</span></div>
+            <div class="vital-item"><span class="vital-key">LANDING_INTENT</span><span class="vital-val"
+                id="modal-landing">—</span></div>
+          </div>
         </div>
 
         <!-- Row 3: Actionable Data -->
         <div class="hud-bottom-row">
-            <div class="hud-log-box">
-                <div id="hud-binary-noise">0xFF DECRYPTED</div>
-                <div>ENCRYPTION: ACTIVE // CHANNEL: 03A-XT</div>
-            </div>
-            <div class="hud-action-btns">
-                <a class="hud-btn-main btn-video" id="modal-video-link" target="_blank">▶ MISSION_VIDEO</a>
-                <a class="hud-btn-main btn-article" id="modal-article-link" target="_blank">▤ DATA_ENTRY</a>
-                <button class="hud-btn-main btn-fav" id="modal-fav-btn">SAVE MISSION</button>
-            </div>
+          <div class="hud-log-box">
+            <div id="hud-binary-noise">0xFF DECRYPTED</div>
+            <div>ENCRYPTION: ACTIVE // CHANNEL: 03A-XT</div>
+          </div>
+          <div class="hud-action-btns">
+            <a class="hud-btn-main btn-video" id="modal-video-link" target="_blank">▶ MISSION_VIDEO</a>
+            <a class="hud-btn-main btn-article" id="modal-article-link" target="_blank">▤ DATA_ENTRY</a>
+            <button class="hud-btn-main btn-fav" id="modal-fav-btn">SAVE MISSION</button>
+          </div>
         </div>
 
       </div>
-
     </div>
   </div>
 
-    <footer class="footer">
+  <footer class="footer">
     <div class="footer-left">
-      <span class="footer-logo" style="display: flex; align-items: center;"><img src="assets/logo.png" alt="Orion Arc Logo" style="height: 18px; width: auto; margin-right: 8px; filter: brightness(1.2) drop-shadow(0 0 4px rgba(79, 195, 247, 0.3));" /> ORION ARC</span>
+      <span class="footer-logo" style="display: flex; align-items: center;"><img src="assets/logo.png"
+          alt="Orion Arc Logo"
+          style="height: 18px; width: auto; margin-right: 8px; filter: brightness(1.2) drop-shadow(0 0 4px rgba(79, 195, 247, 0.3));" />
+        ORION ARC</span>
       <span class="footer-tagline">Track real-world rocket launches with cinematic visualizations</span>
     </div>
     <div class="footer-right">
-      <span class="footer-api">Data · SpaceX API</span>
-      <a class="footer-link" href="https://github.com/aviiixbuilds/orion-arc" target="_blank" rel="noopener">GitHub →</a>
+      <span class="footer-credit">Proudly Designed &amp; Engineered by Aviiix 🚀 &nbsp; | &nbsp; </span>
+      <a class="footer-link" href="https://github.com/aviiixbuilds/Orion-Arc" target="_blank" rel="noopener noreferrer">GitHub
+        →</a>
     </div>
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script type="module">
-    import "./main.js?v=17";
+    import "./main.js?v=47";
   </script>
 </body>
 

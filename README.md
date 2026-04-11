@@ -22,7 +22,7 @@
 
 **Orion Arc** is an immersive, ops-style space launch dashboard that tracks real-world rocket launches. 
 
-While most trackers give you a boring list, Orion Arc renders launches with a **cinematic scroll-driven hero video** and a custom **Canvas-based Orbital Visualiser**. Every launch site is an animated pin on Earth. Select a mission — a trajectory arc animates from the launchpad toward orbit. The whole interface is designed to feel like an actual operations center, not a college assignment.
+While most trackers give you a boring list, Orion Arc renders launches with a **cinematic scroll-driven hero video**, a fully interactive **3D Spatial Globe**, and a custom **Canvas-based Orbital Visualiser**. Every launch site is an animated pin on Earth that tracks seamlessly without horizon-clipping. Select a mission — you're greeted with a high-fidelity cinematic telemetry HUD. The whole interface is designed to feel like an actual operations center, not a college assignment.
 
 ---
 
@@ -42,16 +42,14 @@ The vision for Orion Arc is to be the dashboard that makes space feel **visceral
 
 | Feature | Description |
 |---|---|
-| 🌍 **Orbital Map Visualiser** | Custom Canvas 2D engine with Earth representation, animated launch site pins, and rendering of trajectory arcs |
+| 🌍 **3D Spatial Globe** | Interactive Three.js globe plotting all launch facilities with dynamic map pins and floating holographic city labels |
+| 🛰️ **Orbital Map Visualiser** | Custom Canvas 2D engine rendering trajectory arcs and real-time orbital bands |
 | 🎬 **Cinematic Hero** | Scroll-driven video background with hardware-accelerated 3D typography and parallax animations |
-| 🔍 **Live Search** | Debounced search across mission names, rockets, and agencies |
-| 🎯 **Filter** | Filter by agency and launch status (success / failed / upcoming) |
-| 📊 **Sort** | Sort by launch date (newest or oldest) or payload mass |
-| ❤️ **Mission Favorites** | Save missions to a personal watchlist, persisted via localStorage |
+| 🔍 **Live Search & Filter** | Debounced search and multi-filtering (Status, Orbit) across missions |
+| 📋 **Telemetry HUD** | High-fidelity mission detail modal featuring binary streams, optical scan lines, and action links |
+| ❤️ **Mission Favorites** | Fully reactive favorites grid with staggered fade animations, persisted via localStorage |
 | ⏱️ **Live UTC/IST Clock** | Real-time clock in the navigation bar |
-| 🌙 **Dark / Light Mode** | Full theme toggle — dark by default |
-| 📋 **Mission Detail Panel** | Click any launch to see full mission info — rocket, payload, crew, orbit type, and outcome |
-| 📅 **Launch Timeline** | Chronological visual timeline of all launches — built purely with HTML/SVG |
+| 📅 **Launch Timeline** | Chronological visual timeline of all launches |
 
 ### 🟡 Tech & Performance Enhancements
 
@@ -59,12 +57,11 @@ The vision for Orion Arc is to be the dashboard that makes space feel **visceral
 |---|---|
 | ⌨️ **Debounced Search** | Search fires only after user stops typing — no redundant filtering computations |
 | 💀 **Loading Indicators** | Placeholder skeleton cards animate while data is fetching |
-| 💾 **Local Storage** | Favorites and theme preference survive page reload |
-| 📱 **Responsive Design** | Adapts cleanly across mobile, tablet, and desktop |
-| 📄 **Pagination** | Launch feed split into pages — fast load, easy navigation |
-| 🚀 **Agency Stats Panel** | Live-computed stats per agency — total launches, success rate |
-| 📍 **Custom Iconography** | Dedicated 14x14 assets for mission parameters like orbit, rocket, and date |
+| 💾 **Local/State Management** | Favorites and theme preference survive page reload safely |
+| 🚀 **High-Res Canvas Text** | Uses 1024x256 custom canvases with LinearFiltering for crystal clear 3D globe fonts |
+| 🌀 **Scroll-Velocity Physics** | Math interpolation algorithm ties the stats marquee acceleration directly to user `scrollY` momentum |
 | ⚡ **Hardware Acceleration** | Scroll-spy, 60fps animations, using Intersection Observer algorithms |
+| 🧹 **Lean Codebase** | Free from unnecessary code bloat, strictly maintained pure Vanilla engineering |
 
 ---
 
@@ -72,11 +69,11 @@ The vision for Orion Arc is to be the dashboard that makes space feel **visceral
 
 | Technology | Role |
 |---|---|
-| **HTML** | App structure and semantic markup |
-| **Vanilla CSS** | Styling, advanced 3D transforms, keyframe animations, and responsive layouts |
-| **Vanilla JavaScript** | Core logic, data shaping, pagination, filtering, and Canvas 2D rendering |
-| **Canvas API** | Zero-dependency Orbital Arc Visualiser — drawing Earth, orbit rings, and animated trajectories |
-| **Fetch API** | Parallel HTTP data fetching from SpaceX API |
+| **HTML & CSS** | Layouts, semantic styling, advanced 3D keyframe transforms, and ops-style theming |
+| **Vanilla JavaScript** | Core logic, synthetic data mapping, API debouncing, and Intersection Observers |
+| **Three.js & Spline** | Render pipeline for the interactive 3D Spatial Globe and embedded background `.splinecode` environments |
+| **Canvas API** | Zero-dependency Orbital Arc Visualiser — drawing orbit rings, and animated trajectories |
+| **Fetch API** | `Promise.all` orchestration synthesizing parallel REST loads into a unified relational state object |
 
 ---
 

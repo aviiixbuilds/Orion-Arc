@@ -1,17 +1,13 @@
 
-// ── UTILITIES ──
 const $ = id => document.getElementById(id);
 const $$ = selector => document.querySelectorAll(selector);
 const show = el => { if(!el) return; el.classList.remove("hidden"); setTimeout(() => el.classList.add("visible"), 10); };
 const hide = el => { if(!el) return; el.classList.remove("visible"); setTimeout(() => el.classList.add("hidden"), 400); };
-
-
 function formatDate(isoString) {
   if (!isoString) return "—";
   const d = new Date(isoString);
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
 }
-
 function timeFromNow(isoString) {
   if (!isoString) return "—";
   const now = Date.now();
@@ -31,13 +27,10 @@ function timeFromNow(isoString) {
   else str = `${mins} min${mins > 1 ? "s" : ""}`;
   return diff < 0 ? `${str} ago` : `in ${str}`;
 }
-
 function getYear(isoString) { return isoString ? new Date(isoString).getFullYear() : null; }
-
 function getISTString() {
   return new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }).format(new Date()).toUpperCase() + " IST";
 }
-
 function getTMinus(isoString) {
   const diff = new Date(isoString).getTime() - Date.now();
   if (diff <= 0) return null;
@@ -49,7 +42,6 @@ function getTMinus(isoString) {
     seconds: String(totalSeconds % 60).padStart(2, "0"),
   };
 }
-
 function latLngToXYZ(lat, lng, radius) {
   const phi = (90 - lat) * (Math.PI / 180);
   const theta = (lng + 180) * (Math.PI / 180);
@@ -59,13 +51,11 @@ function latLngToXYZ(lat, lng, radius) {
     z: radius * Math.sin(phi) * Math.sin(theta)
   };
 }
-
 function initGlobeInteractions(globe) {
   globe.addEventListener('mousedown', () => globe.style.cursor = 'grabbing');
   globe.addEventListener('mouseup', () => globe.style.cursor = 'grab');
   globe.addEventListener('wheel', (e) => e.preventDefault(), { passive: false });
 }
-
 function groupByYear(launches) {
   return launches.reduce((acc, launch) => {
     const year = getYear(launch.date);
@@ -73,21 +63,16 @@ function groupByYear(launches) {
     return acc;
   }, {});
 }
-
 function calcSuccessRate(launches) {
   const completed = launches.filter(l => l.success !== null && l.success !== undefined && !l.upcoming);
   if (completed.length === 0) return "—";
   return ((completed.filter(l => l.success === true).length / completed.length) * 100).toFixed(1) + "%";
 }
-
 function formatMass(kg) { return kg ? kg.toLocaleString() + " kg" : "—"; }
-
 function getLaunchStatus(launch) {
   if (launch.upcoming) return "pending";
   return launch.success ? "success" : "failed";
 }
-
-
 function debounce(fn, delay = 300) {
   let timer;
   return function (...args) {
@@ -95,22 +80,18 @@ function debounce(fn, delay = 300) {
     timer = setTimeout(() => fn.apply(this, args), delay);
   };
 }
-
-// ── DATA FETCHING ──
 const BASE_URL = "https://api.spacexdata.com/v4";
 async function fetchData(endpoint) {
     const res = await fetch(`${BASE_URL}${endpoint}`);
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     return res.json();
 }
-
 async function fetchAllData() {
   const [launches, rockets, launchpads, payloads] = await Promise.all([
     fetchData("/launches"), fetchData("/rockets"), fetchData("/launchpads"), fetchData("/payloads")
   ]);
   return { launches, rockets, launchpads, payloads };
 }
-
 function shapeLaunchData(launches, rockets, launchpads, payloads) {
   return launches.map(launch => {
     const rocket = rockets.find(r => r.id === launch.rocket) || {};
@@ -135,73 +116,51 @@ function shapeLaunchData(launches, rockets, launchpads, payloads) {
     };
   });
 }
-
-// ── RENDER LOGIC ──
-// ── HIGH-VELOCITY MARQUEE ──
 let lastScrollY = window.scrollY;
 let scrollVelocity = 0;
 let smoothVelocity = 0;
-
 function initStatsMarquee() {
   const row1Track = document.querySelector('#marquee-row-1 .stats-marquee-track');
   const row2Track = document.querySelector('#marquee-row-2 .stats-marquee-track');
   if (!row1Track || !row2Track) return;
-
   let x1 = 0; let x2 = 0;
-  const baseVelocity1 = -1.0; // Moderate cinematic base
+  const baseVelocity1 = -1.0; 
   const baseVelocity2 = 1.0;
   let isHovering = false;
-
   const wrapper = document.querySelector('.stats-marquee-wrapper');
   wrapper.addEventListener('mouseenter', () => isHovering = true);
   wrapper.addEventListener('mouseleave', () => isHovering = false);
-
   function animate() {
     if (isHovering) {
         requestAnimationFrame(animate);
         return;
     }
-
-    // Measurement check - essential if data loads late
     const firstItem = row1Track.firstElementChild;
     if (!firstItem || firstItem.offsetWidth < 10) {
       requestAnimationFrame(animate);
       return;
     }
-
     const currentScrollY = window.scrollY;
     scrollVelocity = currentScrollY - lastScrollY;
     lastScrollY = currentScrollY;
-
     smoothVelocity += (scrollVelocity - smoothVelocity) * 0.15;
     const velocityFactor = Math.abs(smoothVelocity) * 0.08;
     const directionFactor = smoothVelocity >= 0 ? 1 : -1;
-
     const move1 = baseVelocity1 - (directionFactor * velocityFactor);
     const move2 = baseVelocity2 + (directionFactor * velocityFactor);
-
     x1 += move1;
     x2 += move2;
-
-    const itemWidth = firstItem.offsetWidth + 40; // item + gap
-    
-    // Smooth wrapping
+    const itemWidth = firstItem.offsetWidth + 40; 
     if (x1 <= -itemWidth) x1 += itemWidth;
     if (x1 >= 0) x1 -= itemWidth;
-    
     if (x2 >= 0) x2 -= itemWidth;
     if (x2 <= -itemWidth) x2 += itemWidth;
-
     row1Track.style.transform = `translate3d(${x1}px, 0, 0)`;
     row2Track.style.transform = `translate3d(${x2}px, 0, 0)`;
-
     requestAnimationFrame(animate);
   }
-
   requestAnimationFrame(animate);
 }
-
-// ── TYPEWRITER EFFECT ──
 class Typewriter {
     constructor(element, words, options = {}) {
         this.el = element;
@@ -210,26 +169,20 @@ class Typewriter {
         this.delayBetweenWords = options.delayBetweenWords || 2000;
         this.cursorChar = options.cursorChar || '|';
         this.cursor = options.cursor !== undefined ? options.cursor : true;
-        
         this.displayText = "";
         this.isDeleting = false;
         this.wordIndex = 0;
         this.charIndex = 0;
         this.isPaused = false;
-        
         this.init();
     }
-
     init() {
         this.animate();
     }
-
     animate() {
         if (this.isPaused) return;
-
         const currentWord = this.words[this.wordIndex];
         let delay = this.isDeleting ? this.speed / 2 : this.speed;
-
         if (!this.isDeleting) {
             if (this.charIndex < currentWord.length) {
                 this.displayText = currentWord.substring(0, this.charIndex + 1);
@@ -247,18 +200,14 @@ class Typewriter {
                 this.wordIndex = (this.wordIndex + 1) % this.words.length;
             }
         }
-
         this.render();
         setTimeout(() => this.animate(), delay);
     }
-
     render() {
-        // Use textContent for safety and to avoid potential parsing issues
         if (this.el) {
             this.el.innerHTML = '';
             const textNode = document.createTextNode(this.displayText);
             this.el.appendChild(textNode);
-            
             if (this.cursor) {
                 const cursorSpan = document.createElement('span');
                 cursorSpan.className = 'typewriter-cursor';
@@ -271,11 +220,9 @@ class Typewriter {
         }
     }
 }
-
 function initTimelineTypewriter() {
     const el = document.getElementById('typewriter-target');
     if (!el) {
-        // Retry if HTML wasn't ready (though DOMContentLoaded should cover it)
         const parent = document.querySelector('.timeline-floating-title');
         if (parent) {
             parent.innerHTML = `<div>Launches per year</div><div id="typewriter-target"></div>`;
@@ -283,29 +230,22 @@ function initTimelineTypewriter() {
         }
         return;
     }
-    
     const words = ["across all agencies", "around the world", "into deep space", "since 2006"];
-    
     new Typewriter(el, words, {
         speed: 80,
         delayBetweenWords: 2000,
         cursorChar: "|" 
     });
 }
-
 function renderStats(launches) {
   const total = launches.length, upcoming = launches.filter(l => l.upcoming).length;
   const rate = calcSuccessRate(launches), rockets = [...new Set(launches.map(l => l.rocketName))].length;
   const agencies = [...new Set(launches.map(l => l.nationality).filter(Boolean))].length || '6+';
-  
   const statsStr = `${total} TOTAL LAUNCHES        |        ${rate} SUCCESS RATE        |        ${upcoming} UPCOMING        |        ${agencies} AGENCIES        |        ${rockets} ROCKET TYPES        |        `;
-
   document.querySelectorAll('.marquee-item').forEach(el => {
     el.innerHTML = statsStr;
   });
 }
-
-
 function createLaunchCard(launch) {
   const status = getLaunchStatus(launch);
   const card = document.createElement("div");
@@ -334,7 +274,6 @@ function createLaunchCard(launch) {
   `;
   return card;
 }
-
 function renderLaunchCards(launches) {
   const grid = $("launches-grid"); grid.innerHTML = "";
   if (!launches.length) { show($("empty-state")); hide($("pagination")); return; }
@@ -342,7 +281,6 @@ function renderLaunchCards(launches) {
   launches.forEach(l => grid.appendChild(createLaunchCard(l)));
   $("launch-count").textContent = `${launches.length} mission${launches.length !== 1 ? "s" : ""}`;
 }
-
 function renderPagination(currentPage, totalPages) {
     const container = $("page-numbers"); container.innerHTML = "";
     if (totalPages <= 1) { hide($("pagination")); return; }
@@ -354,34 +292,12 @@ function renderPagination(currentPage, totalPages) {
         const btn = document.createElement("button");
         btn.className = `page-num${i === currentPage ? " active" : ""}`;
         btn.textContent = i; btn.dataset.page = i;
-        btn.onclick = () => renderPage(i); // Added click handler
+        btn.onclick = () => renderPage(i); 
         container.appendChild(btn);
     }
     $("page-prev").disabled = currentPage === 1;
     $("page-next").disabled = currentPage === totalPages || totalPages === 0;
 }
-
-function renderAgencies(launches) {
-  const grid = $("agencies-grid"); grid.innerHTML = "";
-  const rocketNames = [...new Set(launches.map(l => l.rocketName))];
-  rocketNames.forEach(name => {
-    const group = launches.filter(l => l.rocketName === name);
-    const total = group.length;
-    const rate = total > 0 ? ((group.filter(l => l.success === true).length / group.filter(l => !l.upcoming).length) * 100).toFixed(0) : "—";
-    const card = document.createElement("div");
-    card.className = "agency-card";
-    card.innerHTML = `
-      <div class="agency-name">${name}</div>
-      <div class="agency-stats">
-        <div class="agency-stat"><span class="agency-stat-val">${total}</span><span class="agency-stat-label">LAUNCHES</span></div>
-        <div class="agency-stat"><span class="agency-stat-val">${rate}%</span><span class="agency-stat-label">SUCCESS</span></div>
-      </div>
-      <div class="agency-bar-wrap"><div class="agency-bar" style="width: ${rate}%"></div></div>
-    `;
-    grid.appendChild(card);
-  });
-}
-
 function renderTimeline(launches) {
   const container = $("timeline-chart"); container.innerHTML = "";
   const byYear = groupByYear(launches), years = Object.keys(byYear).sort();
@@ -400,10 +316,7 @@ function renderTimeline(launches) {
     container.appendChild(wrap);
   });
 }
-
-// ── STATE MANAGEMENT ──
 const state = { allLaunches: [], filteredLaunches: [], currentPage: 1, perPage: 12, selectedLaunch: null };
-
 function getSavedIds() { return JSON.parse(localStorage.getItem("orion-favorites") || "[]"); }
 function toggleFavorite(id) {
   let saved = getSavedIds(), index = saved.indexOf(id);
@@ -411,45 +324,37 @@ function toggleFavorite(id) {
   localStorage.setItem("orion-favorites", JSON.stringify(saved));
   return index === -1;
 }
-
 function renderFavs() {
     const grid = $("favorites-grid"), saved = getSavedIds(); grid.innerHTML = "";
     if (!saved.length) { show($("fav-empty-state")); $("fav-count").textContent = "0 saved"; return; }
     hide($("fav-empty-state")); $("fav-count").textContent = `${saved.length} saved`;
     state.allLaunches.filter(l => saved.includes(l.id)).forEach(l => grid.appendChild(createLaunchCard(l)));
+    setTimeout(() => {
+        grid.querySelectorAll(".launch-card").forEach((c, i) => setTimeout(() => c.classList.add("visible"), i * 50));
+    }, 10);
 }
-
 function updateFavButtons(id, isSaved) {
     $$(`.card-fav-btn[data-id="${id}"]`).forEach(btn => {
         btn.textContent = isSaved ? "♥" : "♡"; btn.classList.toggle("saved", isSaved);
     });
 }
-
-// ── INITIALIZATION ──
 async function init() {
-    // ── INTERACTIVE TEXT (Sweep Animation) ──
     initInteractiveText();
-
-    // ── DATA FETCH ──
     try {
       console.log('Orion Arc: Initializing...');
       const data = await fetchAllData();
       const shaped = shapeLaunchData(data.launches, data.rockets, data.launchpads, data.payloads);
       shaped.sort((a, b) => new Date(b.date) - new Date(a.date));
       state.allLaunches = state.filteredLaunches = shaped;
-
       $$(".skeleton-card").forEach(s => s.remove());
-      renderStats(shaped); renderAgencies(shaped); renderTimeline(shaped); renderFavs();
+      renderStats(shaped); renderTimeline(shaped); renderFavs();
       initOrbitalVisualiser(shaped); populateAgencyFilter(shaped); renderPage(1);
       initFilters(state, renderPage); initScrollHero();
       initScrollSpy(); initIntersectionObserver();
-      
       const globeContainer = $("globe-canvas-container");
       if (globeContainer) {
           initGlobe(globeContainer, shaped);
       }
-
-
       setStatusLive();
       startClock();
       console.log('Orion Arc: Ready');
@@ -458,19 +363,14 @@ async function init() {
       setStatusError();
     }
 }
-
 function startClock() {
   setInterval(() => { if($("nav-clock")) $("nav-clock").textContent = getISTString(); }, 1000);
 }
-
 function renderModal(launch) {
   const status = getLaunchStatus(launch);
   const badge = $("modal-badge");
   badge.textContent = status === 'success' ? 'STABLE' : (status === 'pending' ? 'PENDING' : 'ERROR: DEGRADED');
-
-
   badge.className = `val badge-${status}`;
-  
   $("modal-mission-name").textContent = launch.name?.toUpperCase();
   $("modal-rocket").textContent = launch.rocketName?.toUpperCase() || 'UNKNOWN';
   $("modal-date").textContent = formatDate(launch.date);
@@ -478,22 +378,15 @@ function renderModal(launch) {
   $("modal-orbit").textContent = (launch.orbit || 'LEO').toUpperCase();
   $("modal-mass").textContent = launch.payloadMass ? `${launch.payloadMass} KG` : 'N/A';
   $("modal-flight").textContent = `ID_${launch.flight_number || '---'}`;
-
-  // Core Hardware Data
   const core = launch.cores?.[0];
   $("modal-core-serial").textContent = core?.coreSerial?.toUpperCase() || 'UNKNOWN_STG';
   $("modal-reuse").textContent = core?.flight ? `${core.flight}x FLOWN` : 'NEW_BUILD';
   $("modal-landing").textContent = core?.landingIntent ? (core.landingSuccess ? 'SUCCESS' : 'TBD/INTENT') : 'EXPENDABLE';
-
-  // Additional technical data
   if($("modal-manufacturer")) $("modal-manufacturer").textContent = (launch.manufacturer || '—').toUpperCase();
   if($("modal-nationality")) $("modal-nationality").textContent = (launch.nationality || '—').toUpperCase();
   if($("modal-region")) $("modal-region").textContent = (launch.siteRegion || 'GLOBAL').toUpperCase();
-
-  // Links as separate buttons
   const videoBtn = $("modal-video-link");
   const articleBtn = $("modal-article-link");
-
   if (launch.links?.webcast) {
     videoBtn.href = launch.links.webcast;
     videoBtn.classList.remove("disabled");
@@ -507,7 +400,6 @@ function renderModal(launch) {
     videoBtn.style.opacity = "0.4";
     videoBtn.style.pointerEvents = "none";
   }
-
   if (launch.links?.article) {
     articleBtn.href = launch.links.article;
     articleBtn.classList.remove("disabled");
@@ -521,42 +413,32 @@ function renderModal(launch) {
     articleBtn.style.opacity = "0.4";
     articleBtn.style.pointerEvents = "none";
   }
-
-
   const favBtn = $("modal-fav-btn");
   const isSaved = getSavedIds().includes(launch.id);
   favBtn.innerHTML = isSaved ? '♥ SAVED' : '♡ SAVE';
   favBtn.classList.toggle('saved', isSaved);
   favBtn.dataset.id = launch.id;
-
   const details = $("modal-details");
   details.innerHTML = (launch.details ? `<p>${launch.details}</p>` : "ANALYZING RE-ENTRY PROFILE... NO ADDITIONAL LOG DATA FOUND.");
-
-  // Technical flair
   const decor = document.querySelector("#hud-binary-noise");
   if (decor) decor.textContent = `HEX_STREAM: ${Math.random().toString(16).substring(2, 12).toUpperCase()}`;
-  
   const loading = document.querySelector(".loading-val");
   if (loading) {
     let count = 0;
-    const target = Math.floor(Math.random() * 20) + 80; // 80-99%
-    const duration = 1200; // 1.2s total
+    const target = Math.floor(Math.random() * 20) + 80; 
+    const duration = 1200; 
     const start = performance.now();
-    
     function update(now) {
       const p = Math.min((now - start) / duration, 1);
-      const ease = 1 - Math.pow(1 - p, 3); // ease-out-cubic
+      const ease = 1 - Math.pow(1 - p, 3); 
       count = Math.floor(ease * target);
       loading.textContent = `${count}%`;
       if (p < 1) requestAnimationFrame(update);
     }
     requestAnimationFrame(update);
   }
-
   show($("modal-overlay"));
 }
-
-
 function renderPage(page) {
     state.currentPage = page;
     const slice = state.filteredLaunches.slice((page-1)*state.perPage, page*state.perPage);
@@ -565,15 +447,11 @@ function renderPage(page) {
     $$(".launch-card").forEach((c, i) => setTimeout(() => c.classList.add("visible"), i * 50));
     if (page > 1) $("launches").scrollIntoView({ behavior: "smooth" });
 }
-
-// ── CUSTOM VISUALS ──
 function initInteractiveText() {
-    // Trigger the silver sweep wave across already hardcoded HTML
     $$(".letter-overlay").forEach((el, i) => {
         setTimeout(() => el.classList.add("sweep"), i * 120);
     });
 }
-
 function initScrollHero() {
     const video = $("hero-video"), section = $("hero-scroll"); if (!video || !section) return;
     window.addEventListener('scroll', () => {
@@ -582,10 +460,9 @@ function initScrollHero() {
             if (video.duration) video.currentTime = progress * video.duration;
             const text = $("reveal-text");
             if (text) {
-                // Fixed scaleY(1.4) baseline + uniform scale on top
                 text.style.transform = `translate3d(0,0,0) scaleY(1.4) scale(${1 + progress * 0.45})`;
-                text.style.opacity = 1 - Math.max(0, (progress - 0.15) * 2.0); // Smoother fade
-                text.style.filter = `blur(${Math.max(0, (progress - 0.05) * 12)}px)`; // Threshold blur
+                text.style.opacity = 1 - Math.max(0, (progress - 0.15) * 2.0); 
+                text.style.filter = `blur(${Math.max(0, (progress - 0.05) * 12)}px)`; 
             }
         });
     });
@@ -595,14 +472,11 @@ function initTypewriterSubtitles() {
     const text = el.textContent.trim();
     const RANDOM_CHARS = "_!X$0-+*#";
     const getRandomChar = () => RANDOM_CHARS[Math.floor(Math.random() * RANDOM_CHARS.length)];
-    
-    el.classList.add("special-text-active"); // For font-mono styling if needed
-    
+    el.classList.add("special-text-active"); 
     new IntersectionObserver(entries => {
         if (entries[0].isIntersecting) {
             let phase = 1; let step = 0; const speed = 20;
             const maxSteps = text.length * 2;
-
             const interval = setInterval(() => {
                 let content = "";
                 if (phase === 1) {
@@ -616,10 +490,8 @@ function initTypewriterSubtitles() {
                     if (revealedCount < text.length) {
                         content += (step % 2 === 0) ? "_" : getRandomChar();
                     }
-                    // Fill remaining with noise
                     let currentRawLen = revealedCount + (revealedCount < text.length ? 1 : 0);
                     for (let i = currentRawLen; i < text.length; i++) content += getRandomChar();
-
                     if (step >= maxSteps - 1) {
                         el.textContent = text; clearInterval(interval); return;
                     }
@@ -631,13 +503,11 @@ function initTypewriterSubtitles() {
         }
     }, { threshold: 0.5 }).observe(el);
 }
-
 function initIntersectionObserver() {
     const observer = new IntersectionObserver(entries => entries.forEach(e => {
         if (e.isIntersecting) { e.target.classList.add("visible"); observer.unobserve(e.target); }
     }), { threshold: 0.1 });
     $$(".section-title, .agency-card").forEach(el => observer.observe(el));
-
     const tlObserver = new IntersectionObserver(entries => entries.forEach(e => {
         if (e.isIntersecting) {
             const wraps = $$(".neon-bar-wrap");
@@ -660,29 +530,25 @@ function initIntersectionObserver() {
     }), { threshold: 0.4 });
     if ($("timeline")) tlObserver.observe($("timeline"));
 }
-
-// ── GLOBE (Three.js) ──
 let globeScene, globeCamera, globeRenderer, globeEarth, globeAtmosphere, globePins = [], globeRaycaster = new THREE.Raycaster(), globeMouse = new THREE.Vector2();
-
 function createTextLabel(text, color = "#00e5ff") {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
-    canvas.width = 512; canvas.height = 128;
-    ctx.font = "Bold 48px 'JetBrains Mono', monospace";
+    canvas.width = 1024; canvas.height = 256;
+    ctx.font = "Bold 84px 'JetBrains Mono', monospace";
     ctx.fillStyle = color;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.shadowBlur = 15;
+    ctx.shadowBlur = 2; 
     ctx.shadowColor = color;
-    ctx.fillText(text.toUpperCase(), 256, 64);
-    
+    ctx.fillText(text.toUpperCase(), 512, 128);
     const texture = new THREE.CanvasTexture(canvas);
+    texture.minFilter = THREE.LinearFilter;
     const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
     const sprite = new THREE.Sprite(mat);
     sprite.scale.set(2.5, 0.6, 1);
     return sprite;
 }
-
 function latLongToVector3(lat, lon, radius) {
     const phi = (90 - lat) * (Math.PI / 180);
     const theta = (lon + 180) * (Math.PI / 180);
@@ -691,61 +557,45 @@ function latLongToVector3(lat, lon, radius) {
     const y = (radius * Math.cos(phi));
     return new THREE.Vector3(x, y, z);
 }
-
-function addLaunchpadPins(scene, launches, radius) {
+function addLaunchpadPins(group, launches, radius) {
     const pads = [];
     const seen = new Set();
     launches.forEach(l => {
         if (!l.siteLat || !l.siteLng || seen.has(l.siteName)) return;
         seen.add(l.siteName);
-        pads.push({ lat: l.siteLat, lng: l.siteLng, name: l.siteName });
+        pads.push({ lat: l.siteLat, lng: l.siteLng, name: l.siteName, region: l.siteRegion });
     });
-
     const pinTexture = new THREE.TextureLoader().load("assets/content.png");
-    const pinGroup = new THREE.Group();
-
+    const pins = new THREE.Group();
     pads.forEach(pad => {
         const pos = latLongToVector3(pad.lat, pad.lng, radius);
-        
-        // DIGITAL MAPPING PIN (Sprite)
-        const pinMat = new THREE.SpriteMaterial({ 
-            map: pinTexture, 
-            transparent: true, 
-            opacity: 1.0,
-            depthWrite: false, 
-            depthTest: true
-        });
+        const pinMat = new THREE.SpriteMaterial({ map: pinTexture, transparent: true, opacity: 1.0, depthTest: false });
         const pin = new THREE.Sprite(pinMat);
-        pin.scale.set(0.01, 0.01, 1); // Start small for anim
-        pin.position.copy(pos.clone().multiplyScalar(1.08));
+        pin.scale.set(0.01, 0.01, 1);
+        pin.center.set(0.5, 0); 
+        pin.position.copy(pos.clone().multiplyScalar(1.01));
         pin.userData = { type: 'pin', targetScale: 1.2, introProgress: 0 };
-        pinGroup.add(pin);
-
-        // LOCATION LABEL
+        pins.add(pin);
         const label = createTextLabel(pad.name);
-        label.position.copy(pos.clone().multiplyScalar(1.22));
+        if (pad.region && pad.region !== "—") {
+            const regLabel = createTextLabel(pad.region, "#ffffff"); 
+            regLabel.position.copy(pos.clone().multiplyScalar(1.35)); 
+            regLabel.scale.set(0.01, 0.01, 1);
+            regLabel.userData = { type: 'label', targetScaleX: 1.8, targetScaleY: 0.45, introProgress: 0 };
+            regLabel.material.opacity = 1.0; 
+            pins.add(regLabel);
+            label.position.copy(pos.clone().multiplyScalar(1.35));
+            label.center.set(0.5, 1.375);
+        } else {
+            label.position.copy(pos.clone().multiplyScalar(1.22));
+        }
         label.scale.set(0.01, 0.01, 1);
         label.userData = { type: 'label', targetScaleX: 2.5, targetScaleY: 0.6, introProgress: 0 };
-        pinGroup.add(label);
-
-        // HIGHLIGHT GRADIENT
-        const auraGeo = new THREE.RingGeometry(0.1, 0.45, 32);
-        const auraMat = new THREE.MeshBasicMaterial({ 
-            color: 0x00e5ff, 
-            transparent: true, 
-            opacity: 0.15, 
-            side: THREE.DoubleSide,
-            depthWrite: false
-        });
-        const aura = new THREE.Mesh(auraGeo, auraMat);
-        aura.position.copy(pos.clone().multiplyScalar(1.01));
-        aura.lookAt(new THREE.Vector3(0,0,0));
-        pinGroup.add(aura);
+        pins.add(label);
     });
-    scene.add(pinGroup);
-    return pinGroup;
+    group.add(pins);
+    return pins;
 }
-
 function initGlobe(container, launches) {
     if (!container || !window.THREE) return;
     globeScene = new THREE.Scene();
@@ -756,51 +606,46 @@ function initGlobe(container, launches) {
     container.appendChild(globeRenderer.domElement);
     globeScene.add(new THREE.AmbientLight(0xffffff, 0.4));
     const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(5,3,5); globeScene.add(sun);
-    
     const globeRadius = 5;
     const geo = new THREE.SphereGeometry(globeRadius, 64, 64);
     const texture = new THREE.TextureLoader().load("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg");
     globeEarth = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ map: texture })); globeScene.add(globeEarth);
-
     const atmosphereGeo = new THREE.SphereGeometry(globeRadius + 0.1, 64, 64);
     globeAtmosphere = new THREE.Mesh(atmosphereGeo, new THREE.MeshPhongMaterial({ color: 0x4fc3f7, transparent: true, opacity: 0.15 })); globeScene.add(globeAtmosphere);
-
-    // ADD PINS
     const pins = addLaunchpadPins(globeEarth, launches, globeRadius);
-
-    // INTERACTION LOGIC
     let isDragging = false, mouseX = 0, mouseY = 0;
+    const raycaster = new THREE.Raycaster();
+    const mouseVector = new THREE.Vector2();
     container.onmousedown = (e) => { isDragging = true; mouseX = e.clientX; mouseY = e.clientY; container.style.cursor = 'grabbing'; };
-    window.onmousemove = (e) => {
+    container.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        mouseVector.x = ((e.clientX - rect.left) / container.clientWidth) * 2 - 1;
+        mouseVector.y = -((e.clientY - rect.top) / container.clientHeight) * 2 + 1;
         if (!isDragging) return;
         const dx = e.clientX - mouseX, dy = e.clientY - mouseY;
         globeEarth.rotation.y += dx * 0.005; globeEarth.rotation.x += dy * 0.005;
         globeAtmosphere.rotation.y += dx * 0.005; globeAtmosphere.rotation.x += dy * 0.005;
-        
-        // Also rotate the pins (they are in the scene directly, so rotating the Earth isn't enough if they aren't children)
-        // Grouping them is better
         mouseX = e.clientX; mouseY = e.clientY;
-    };
+    });
     window.onmouseup = () => { isDragging = false; container.style.cursor = 'grab'; };
     container.onwheel = (e) => {
-        e.preventDefault();
-        globeCamera.position.z += e.deltaY * 0.01;
-        globeCamera.position.z = Math.max(7, Math.min(25, globeCamera.position.z));
+        raycaster.setFromCamera(mouseVector, globeCamera);
+        const intersects = raycaster.intersectObject(globeEarth);
+        if (intersects.length > 0) {
+            e.preventDefault();
+            globeCamera.position.z += e.deltaY * 0.01;
+            globeCamera.position.z = Math.max(7, Math.min(25, globeCamera.position.z));
+        }
     };
-
     function loop() { 
         requestAnimationFrame(loop); 
         const time = Date.now() * 0.001;
-        
         if (!isDragging) {
             globeEarth.rotation.y += 0.0015; 
             globeAtmosphere.rotation.y += 0.0015; 
         }
-
-        // Pulse & Reveal the pins
         if (pins) {
             pins.children.forEach((child, i) => {
-                // Intro Animation
                 if (child.userData && child.userData.introProgress < 1) {
                     child.userData.introProgress += 0.02;
                     const p = child.userData.introProgress;
@@ -811,45 +656,30 @@ function initGlobe(container, launches) {
                         child.scale.set(child.userData.targetScaleX * p, child.userData.targetScaleY * p, 1);
                     }
                 }
-
-                if (child.geometry && child.geometry.type === 'RingGeometry') {
-                    const s = 1 + Math.sin(time * 3 + i) * 0.1;
-                    child.scale.set(s, s, s);
-                    child.material.opacity = 0.4 + Math.sin(time * 3 + i) * 0.2;
-                }
             });
         }
-
         globeRenderer.render(globeScene, globeCamera); 
     }
     loop();
 }
-
-
-// ── REMAINING LOGIC ──
 function filterBySearch(launches, query) {
   if (!query) return launches;
   const q = query.toLowerCase().trim();
   return launches.filter(l => l.name.toLowerCase().includes(q) || l.rocketName.toLowerCase().includes(q) || l.siteName.toLowerCase().includes(q));
 }
-
 function filterByAgency(launches, agency) {
   return (!agency || agency === "all") ? launches : launches.filter(l => l.rocketName === agency);
 }
-
 function filterByStatus(launches, status) {
   if (!status || status === "all") return launches;
   if (status === "pending") return launches.filter(l => l.upcoming === true);
   if (status === "success") return launches.filter(l => l.success === true && !l.upcoming);
-
   if (status === "failed") return launches.filter(l => l.success === false && !l.upcoming);
   return launches;
 }
-
 function filterByOrbit(launches, orbit) {
   return (!orbit || orbit === "all") ? launches : launches.filter(l => l.orbit === orbit);
 }
-
 function sortLaunches(launches, sortVal) {
   const arr = [...launches];
   if (sortVal === "date-asc") return arr.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -858,14 +688,12 @@ function sortLaunches(launches, sortVal) {
   if (sortVal === "mass-asc") return arr.sort((a, b) => (a.payloadMass || 0) - (b.payloadMass || 0));
   return arr.sort((a, b) => new Date(b.date) - new Date(a.date));
 }
-
 function applyFilters() {
   const query = $("search-input")?.value || "";
   const agency = $("filter-agency")?.value || "all";
   const status = $("filter-status")?.value || "all";
   const orbit = $("filter-orbit")?.value || "all";
   const sort = $("sort-select")?.value || "date-desc";
-
   let result = state.allLaunches;
   result = filterBySearch(result, query);
   result = filterByAgency(result, agency);
@@ -874,7 +702,6 @@ function applyFilters() {
   state.filteredLaunches = sortLaunches(result, sort);
   renderPage(1);
 }
-
 function resetFilters() {
   if ($("search-input")) $("search-input").value = "";
   if ($("filter-agency")) $("filter-agency").value = "all";
@@ -883,7 +710,6 @@ function resetFilters() {
   if ($("sort-select")) $("sort-select").value = "date-desc";
   applyFilters();
 }
-
 function initFilters(state, renderPage) {
     const run = debounce(applyFilters);
     $("search-input")?.addEventListener("input", run);
@@ -891,46 +717,31 @@ function initFilters(state, renderPage) {
     $("filter-status")?.addEventListener("change", applyFilters);
     $("filter-orbit")?.addEventListener("change", applyFilters);
     $("sort-select")?.addEventListener("change", applyFilters);
-
     $("empty-reset")?.addEventListener("click", resetFilters);
     $("search-clear")?.addEventListener("click", () => {
         if ($("search-input")) $("search-input").value = "";
         applyFilters();
     });
 }
-
 function setStatusLive() { if($("status-dot")) $("status-dot").classList.add("live"); if($("status-label")) $("status-label").textContent = "LIVE DATA"; }
 function setStatusError() { if($("status-dot")) $("status-dot").classList.add("error"); if($("status-label")) $("status-label").textContent = "API ERROR"; }
-
 document.addEventListener("DOMContentLoaded", async () => {
-    // ── CUBE LOADER ORCHESTRATION ──
     const loader = $("cube-loader-overlay");
     const startTime = Date.now();
-
     initStatsMarquee();
     initTimelineTypewriter();
-
-    // Start fetching and rendering in the background after a short delay
-    // to give the initial cube entrance animation full CPU priority.
     const initPromise = new Promise(resolve => {
         setTimeout(async () => {
             await init();
             resolve();
         }, 300);
     });
-
-    // Wait at least 2 seconds as requested, but start count from now
     const ensureTwoSeconds = new Promise(resolve => setTimeout(resolve, 2000));
-
     await Promise.all([initPromise, ensureTwoSeconds]);
-
-    // Slowly blur and vanish
     if (loader) {
         loader.classList.add("fade-out");
-        // Remove from DOM after transition finishes for performance
         setTimeout(() => loader.remove(), 1000);
     }
-
     $("launches-grid").onclick = $("favorites-grid").onclick = e => {
         const id = e.target.closest("[data-id]")?.dataset.id;
         if (e.target.closest(".card-fav-btn")) { toggleFavorite(id); updateFavButtons(id, getSavedIds().includes(id)); renderFavs(); }
@@ -956,67 +767,73 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (state.currentPage < total) renderPage(state.currentPage + 1); 
     };
 });
-
 function initOrbitalVisualiser(launches) {
     const canvas = $("orbital-canvas"), ctx = canvas.getContext('2d');
     if (!canvas) return;
+    const earthImg = new Image();
+    earthImg.src = "assets/earth.png";
     let idx = 0, auto = true, timer = null;
     const missions = launches.filter(l => l.orbit !== "—").slice(0, 50);
-
     function resize() {
         const dpr = window.devicePixelRatio || 1;
         canvas.width = canvas.clientWidth * dpr; canvas.height = canvas.clientHeight * dpr;
         ctx.scale(dpr, dpr); ctx.lineWidth = 1;
     }
     window.addEventListener('resize', resize); resize();
-
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const cx = canvas.clientWidth / 2, cy = canvas.clientHeight / 2;
         const maxR = Math.min(cx, cy) * 0.85;
-
-        // Bands
         const bands = [
-            { r: 0.15, c: "rgba(79, 195, 247, 0.15)", name: "LEO" },
-            { r: 0.35, c: "rgba(129, 199, 132, 0.12)", name: "ISS" },
-            { r: 0.60, c: "rgba(255, 183, 77, 0.1)", name: "SSO" },
-            { r: 0.85, c: "rgba(206, 147, 216, 0.08)", name: "GEO" }
+            { r: 0.22, c: "rgba(79, 195, 247, 0.4)", name: "LEO" },
+            { r: 0.42, c: "rgba(129, 199, 132, 0.35)", name: "ISS" },
+            { r: 0.68, c: "rgba(255, 183, 77, 0.3)", name: "SSO" },
+            { r: 0.92, c: "rgba(206, 147, 216, 0.25)", name: "GEO" }
         ];
-
+        ctx.lineWidth = 2.5; 
         bands.forEach(b => {
-           ctx.strokeStyle = b.c; ctx.beginPath(); ctx.arc(cx, cy, maxR * b.r, 0, Math.PI*2); ctx.stroke();
+           ctx.strokeStyle = b.c; 
+           ctx.shadowBlur = 10;
+           ctx.shadowColor = b.c;
+           ctx.beginPath(); ctx.arc(cx, cy, maxR * b.r, 0, Math.PI*2); ctx.stroke();
         });
-
-        // Earth
-        ctx.fillStyle = "#0d1a2e"; ctx.beginPath(); ctx.arc(cx, cy, maxR * 0.08, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = "rgba(79, 195, 247, 0.4)"; ctx.beginPath(); ctx.arc(cx, cy, maxR * 0.08, 0, Math.PI*2); ctx.stroke();
-
-        // Missions
+        ctx.shadowBlur = 0; 
+        const earthR = maxR * 0.15;
+        const flare = ctx.createRadialGradient(cx, cy, earthR * 0.9, cx, cy, earthR * 1.2);
+        flare.addColorStop(0, "rgba(79, 195, 247, 0.4)");
+        flare.addColorStop(1, "transparent");
+        ctx.fillStyle = flare; ctx.beginPath(); ctx.arc(cx, cy, earthR * 1.2, 0, Math.PI*2); ctx.fill();
+        if (earthImg.complete) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, earthR, 0, Math.PI * 2);
+            ctx.clip();
+            ctx.drawImage(earthImg, cx - earthR, cy - earthR, earthR * 2, earthR * 2);
+            ctx.restore();
+        } else {
+            ctx.fillStyle = "#0d1a2e"; ctx.beginPath(); ctx.arc(cx, cy, earthR, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.lineWidth = 1; 
         missions.forEach((m, i) => {
             const angle = (i * 0.4) + (performance.now() * 0.0001 * (i % 2 ? 1 : -1));
             const band = bands.find(b => b.name === m.orbit) || bands[3];
             const dist = maxR * band.r;
             const x = cx + Math.cos(angle) * dist, y = cy + Math.sin(angle) * dist;
-
-            ctx.fillStyle = i === idx ? "#4fc3f7" : "rgba(255,255,255,0.2)";
-            ctx.beginPath(); ctx.arc(x, y, i === idx ? 4 : 2, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = i === idx ? "#4fc3f7" : "rgba(255,255,255,0.4)";
+            ctx.beginPath(); ctx.arc(x, y, i === idx ? 6 : 3, 0, Math.PI*2); ctx.fill();
             if(i === idx) {
-                ctx.strokeStyle = "#4fc3f7"; ctx.beginPath(); ctx.arc(x, y, 8 + Math.sin(performance.now()*0.01)*2, 0, Math.PI*2); ctx.stroke();
+                ctx.strokeStyle = "#4fc3f7"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, 12 + Math.sin(performance.now()*0.01)*4, 0, Math.PI*2); ctx.stroke();
             }
         });
-
         if(missions[idx]) updateOrbitalUI(missions[idx], idx + 1, missions.length);
         requestAnimationFrame(draw);
     }
-    
     $("orbital-next").onclick = () => { auto = false; idx = (idx + 1) % missions.length; };
     $("orbital-prev").onclick = () => { auto = false; idx = (idx - 1 + missions.length) % missions.length; };
     $("orbital-auto").onclick = () => { auto = !auto; $("orbital-auto").textContent = auto ? "⏸ PAUSE" : "▶ PLAY"; };
-
     setInterval(() => { if(auto) idx = (idx + 1) % missions.length; }, 4000);
     draw();
 }
-
 function updateOrbitalUI(m, count, total) {
     if(!m) return;
     $("orbital-mission-name").textContent = m.name;
@@ -1029,14 +846,12 @@ function updateOrbitalUI(m, count, total) {
     $("orbital-idx").textContent = count;
     $("orbital-total").textContent = total;
 }
-
 function populateAgencyFilter(launches) {
   const select = $("filter-agency"); if(!select) return;
   [...new Set(launches.map(l => l.rocketName))].sort().forEach(name => {
     const opt = document.createElement("option"); opt.value = name; opt.textContent = name; select.appendChild(opt);
   });
 }
-
 function initScrollSpy() {
   const observer = new IntersectionObserver(entries => entries.forEach(e => {
     if (e.isIntersecting) {
@@ -1045,5 +860,5 @@ function initScrollSpy() {
         if (active) active.classList.add("active");
     }
   }), { threshold: 0.3 });
-  ["globe", "launches", "agencies", "favorites"].forEach(id => { if($(id)) observer.observe($(id)); });
+  ["globe", "launches", "orbital", "timeline", "favorites"].forEach(id => { if($(id)) observer.observe($(id)); });
 }
