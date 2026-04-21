@@ -752,13 +752,41 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // --- Preload all critical images during cube loader ---
-    const preloadImages = [
+    // --- Preload only critical UI elements during cube loader ---
+    const criticalImages = [
         'assets/logo.png',
         'assets/earth.png',
         'assets/Spaceship.png',
         'assets/location.png',
-        'assets/callender.png',
+        'assets/callender.png'
+    ];
+
+    const imagePreloadPromise = Promise.all(
+        criticalImages.map(src => new Promise(resolve => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = resolve;
+            img.src = src;
+        }))
+    );
+
+    // --- Ensure hero video is ready ---
+    const video = $("hero-video");
+    const videoPromise = video ? new Promise(resolve => {
+        if (video.readyState >= 3) resolve();
+        else {
+            video.addEventListener('canplay', resolve, { once: true });
+            setTimeout(resolve, 3000); // Fail-safe: don't wait more than 3s for video
+        }
+    }) : Promise.resolve();
+
+    const initPromise = init();
+    const minLoadDelay = new Promise(resolve => setTimeout(resolve, 800));
+
+    await Promise.all([initPromise, minLoadDelay, imagePreloadPromise, videoPromise]);
+
+    // --- Background load non-critical assets after loader hides ---
+    const deferredImages = [
         'assets/content.png',
         'assets/scan-small.jpg',
         'assets/orbital-bg.jpg',
@@ -774,26 +802,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         'assets/Satellites/different-types-of-satellites-jpg.webp',
         'assets/Satellites/gw-nasa-earth-science-mission-satellite.jpg'
     ];
-    const imagePreloadPromise = Promise.all(
-        preloadImages.map(src => new Promise(resolve => {
-            const img = new Image();
-            img.onload = resolve;
-            img.onerror = resolve; // Don't block on failure
-            img.src = src;
-        }))
-    );
 
-    const initPromise = new Promise(resolve => {
-        setTimeout(async () => {
-            await init();
-            resolve();
-        }, 300);
-    });
-    const ensureTwoSeconds = new Promise(resolve => setTimeout(resolve, 2000));
-    await Promise.all([initPromise, ensureTwoSeconds, imagePreloadPromise]);
     if (loader) {
         loader.classList.add("fade-out");
-        setTimeout(() => loader.remove(), 1000);
+        setTimeout(() => {
+            loader.remove();
+            // Start background preloading
+            deferredImages.forEach(src => { const img = new Image(); img.src = src; });
+        }, 1000);
     }
     $("launches-grid").onclick = $("favorites-grid").onclick = e => {
         const id = e.target.closest("[data-id]")?.dataset.id;
